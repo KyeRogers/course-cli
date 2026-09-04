@@ -1,0 +1,30 @@
+{
+  "assignments": [
+    {
+      "completed": false,
+      "course_id": 0,
+      "due_date": "7389",
+      "id": 1,
+      "name": "task1"
+    },
+    {
+      "completed": false,
+      "course_id": 0,
+      "due_date": "736873",
+      "id": 2,
+      "name": "task2"
+    }
+  ],
+  "courses": [
+    {
+      "colour": "BrightBlue",
+      "id": 1,
+      "name": "math"
+    },
+    {
+      "colour": "BrightBlue",
+      "id": 2,
+      "name": "lengua"
+    }
+  ]
+}

@@ -6,7 +6,7 @@ help:
 	@echo "  make clean   - Remove cached files and logs"
 
 build: 
-	g++ -o course-cli src/main.cpp src/assignment.cpp src/manager.cpp
+	g++ -Iinclude -o course-cli src/main.cpp src/assignment.cpp src/manager.cpp src/course.cpp
 
 test:
 	@echo "Running tests..."
