@@ -37,15 +37,15 @@ namespace Colors {
     }
 
     inline CourseColour from_string(const std::string& color_str) {
-        if (color_str == "Red")         return CourseColour::Red;
-        if (color_str == "Green")       return CourseColour::Green;
-        if (color_str == "Yellow")      return CourseColour::Yellow;
-        if (color_str == "Blue")        return CourseColour::Blue;
-        if (color_str == "Magenta")     return CourseColour::Magenta;
-        if (color_str == "Cyan")        return CourseColour::Cyan;
-        if (color_str == "White")       return CourseColour::White;
-        if (color_str == "Gray")        return CourseColour::BrightBlack;
-        if (color_str == "BrightBlue")  return CourseColour::BrightBlue;
+        if (color_str == "Red" || color_str == "red")         return CourseColour::Red;
+        if (color_str == "Green" || color_str == "green")       return CourseColour::Green;
+        if (color_str == "Yellow" || color_str == "yellow")      return CourseColour::Yellow;
+        if (color_str == "Blue" || color_str == "blue")        return CourseColour::Blue;
+        if (color_str == "Magenta" || color_str == "magenta")     return CourseColour::Magenta;
+        if (color_str == "Cyan" || color_str == "cyan")        return CourseColour::Cyan;
+        if (color_str == "White" || color_str == "white")       return CourseColour::White;
+        if (color_str == "Gray" || color_str == "gray")        return CourseColour::BrightBlack;
+        if (color_str == "BrightBlue" || color_str == "brightbluej")  return CourseColour::BrightBlue;
         
         return CourseColour::Default;
     }

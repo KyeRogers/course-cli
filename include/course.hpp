@@ -14,6 +14,8 @@ class Course {
         const std::string& GetName() const;
         CourseColour GetColour() const;
 
+        void Print() const;
+
     private:
         int id_;
         std::string name_;

@@ -17,12 +17,15 @@ class Manager {
         bool SaveData(const std::string& filename) const;
 
         void ShowAssignments() const;
+        void ShowCourses() const;
+
+        int GetCourseId(const std::string& name) const;
     private:
         std::vector<Assignment> assignments_;
         std::vector<Course> courses_;
         int last_assignment_id_, last_course_id_;
 
-        void LoadData(const std::string& filename);
+        bool LoadData(const std::string& filename);
 
 
 };

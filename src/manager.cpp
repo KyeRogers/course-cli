@@ -3,14 +3,16 @@
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
-
+#include <system_error>
 Manager::Manager()
     : assignments_{std::vector<Assignment>(0)},
       courses_{std::vector<Course>(0)},
       last_assignment_id_{0},
       last_course_id_{0} {
-        LoadData("data/data.json");
-      }
+  if (!LoadData("data/data.json")) {
+    std::exit(0);
+  }
+}
 
 // Todo: add task should be a bool to allow us to know whether the task was
 // actually added successfully or not
@@ -30,6 +32,7 @@ void Manager::AddCourse(const std::string& name, const CourseColour colour) {
 bool Manager::SaveData(const std::string& filename) const {
   std::ofstream output_file(filename);
   if (!output_file) {
+    std::perror("Error loading file to save data");
     return false;
   }
 
@@ -59,16 +62,47 @@ bool Manager::SaveData(const std::string& filename) const {
 // temporary fromat for testing
 void Manager::ShowAssignments() const {
   std::cout << " TASK LIST\n#################";
-  for (Assignment assignment : assignments_) {
+  for (const Assignment assignment : assignments_) {
     assignment.print();
   }
   std::cout << "\n###############\n";
 }
 
-void Manager::LoadData(const std::string& filename) {
+void Manager::ShowCourses() const {
+  std::cout << " ### Courses ###\n";
+  for (const Course course : courses_) {
+    course.Print();
+  }
+  std::cout << "\n###############\n";
+}
+
+bool Manager::LoadData(const std::string& filename) {
   std::ifstream input_file(filename);
+  if (!input_file) {
+    std::perror("Error opening data file");
+    return false;
+  }
+
+  input_file >> std::ws;
+
+  if (input_file.peek() == std::ifstream::traits_type::eof()) {
+    return true;
+  }
   nlohmann::json document;
   input_file >> document;
+
+  if (!document.contains("courses") || !document.contains("assignments")) {
+    std::cout << "File: " << filename
+              << " is empty or corrupted, overwrite?[y/n] ";
+    char response;
+    std::cin >> response;
+    if (response == 'y') {
+      return true;
+    } else {
+      std::perror("Cannot continue with corrupt file");
+      return false;
+    }
+  }
 
   // load courses
   for (const auto& course_data : document.at("courses")) {
@@ -88,7 +122,11 @@ void Manager::LoadData(const std::string& filename) {
                           assignment_data.at("completed").get<bool>());
     assignments_.push_back(assignment);
   }
-
-  last_course_id_ = courses_[courses_.size() - 1].GetId();
-  last_assignment_id_= assignments_[assignments_.size() - 1].GetId();
+  if (courses_.size() >= 1) {
+    last_course_id_ = courses_[courses_.size() - 1].GetId();
+  }
+  if (assignments_.size() >= 1) {
+    last_assignment_id_ = assignments_[assignments_.size() - 1].GetId();
+  }
+  return true;
 }

@@ -3,7 +3,7 @@
 
 int main() {
     Manager manager;
-    std::cout << " [0] to exit, [1] to add task, [2] to add course, [3] to show task list\n";
+    std::cout << " [0] to exit, [1] to add task, [2] to add course, [3] to show task list, [4] to show course list\n";
     int option;
     while (std::cin >> option) {
         if (option == 0) {
@@ -26,11 +26,13 @@ int main() {
             std::cout << "\nColour: ";
             std::cin >> colour;           
             std::cout << "\nCourse added successfully\n";
-            manager.AddCourse(name, CourseColour::BrightBlue);
+            manager.AddCourse(name, Colors::from_string(colour));
+        } else if (option == 4) {
+            manager.ShowCourses();
         } else {
             manager.ShowAssignments();
         }
-         std::cout << " [0] to exit, [1] to add task, [2] to add course, [3] to show task list\n";
+         std::cout << " [0] to exit, [1] to add task, [2] to add course, [3] to show task list, [4] to show course list\n";
     }
     manager.SaveData("data/data.json");
     return 0;

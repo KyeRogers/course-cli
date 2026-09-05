@@ -1,0 +1,25 @@
+{
+  "assignments": [],
+  "courses": [
+    {
+      "colour": "BrightBlue",
+      "id": 1,
+      "name": "maths"
+    },
+    {
+      "colour": "BrightBlue",
+      "id": 2,
+      "name": "lengua"
+    },
+    {
+      "colour": "Default",
+      "id": 3,
+      "name": "physics"
+    },
+    {
+      "colour": "Green",
+      "id": 4,
+      "name": "chem"
+    }
+  ]
+}
