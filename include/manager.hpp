@@ -22,6 +22,8 @@ class Manager {
         std::vector<Course> courses_;
         int last_assignment_id_, last_course_id_;
 
+        void LoadData(const std::string& filename);
+
 
 };
 

@@ -6,6 +6,8 @@ Assignment::Assignment() : id_{9999999}, name_{"NULL"}, due_date_{"NULL"}, compl
 
 Assignment::Assignment(const int id, const int course_id, const std::string& name, const std::string& due_date) : id_{id}, course_id_{course_id}, name_{name}, due_date_{due_date}, completed_{false} {}
 
+Assignment::Assignment(const int id, const int course_id, const std::string& name, const std::string& due_date, const bool completed) : id_{id}, course_id_{course_id}, name_{name}, due_date_{due_date}, completed_{completed} {}
+
 // getters
 int Assignment::GetId() const {
     return id_;

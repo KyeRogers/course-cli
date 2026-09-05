@@ -7,6 +7,7 @@ class Assignment {
     public:
         Assignment();
         Assignment(const int id, const int course_id, const std::string& name, const std::string& due_date);
+        Assignment(const int id, const int course_id, const std::string& name, const std::string& due_date, const bool completed);
  
         int GetId() const;
         int GetCourseId() const;
