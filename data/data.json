@@ -1,5 +1,20 @@
 {
-  "assignments": [],
+  "assignments": [
+    {
+      "completed": true,
+      "course_id": 5,
+      "due_date": "12:00",
+      "id": 1,
+      "name": "homework"
+    },
+    {
+      "completed": false,
+      "course_id": 1,
+      "due_date": "24/01-23:59",
+      "id": 2,
+      "name": "exam"
+    }
+  ],
   "courses": [
     {
       "colour": "BrightBlue",
@@ -20,6 +35,11 @@
       "colour": "Green",
       "id": 4,
       "name": "chem"
+    },
+    {
+      "colour": "Yellow",
+      "id": 5,
+      "name": "programming"
     }
   ]
 }

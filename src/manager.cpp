@@ -14,13 +14,19 @@ Manager::Manager()
   }
 }
 
-// Todo: add task should be a bool to allow us to know whether the task was
-// actually added successfully or not
-void Manager::AddTask(const std::string& name, const int course_id,
+bool Manager::AddTask(const std::string& name, const std::string& course,
                       const std::string& due_date) {
-  Assignment new_assignment(last_assignment_id_ + 1, course_id, name, due_date);
-  assignments_.push_back(new_assignment);
-  last_assignment_id_++;
+  int course_id = GetCourseIdByName(course);
+  if (course_id == 0) {
+    std::cerr << name << " doesnt exist\n";
+    return false;
+  } else {
+    Assignment new_assignment(last_assignment_id_ + 1, course_id, name,
+                              due_date);
+    assignments_.push_back(new_assignment);
+    last_assignment_id_++;
+    return true;
+  }
 }
 
 void Manager::AddCourse(const std::string& name, const CourseColour colour) {
@@ -61,9 +67,18 @@ bool Manager::SaveData(const std::string& filename) const {
 
 // temporary fromat for testing
 void Manager::ShowAssignments() const {
-  std::cout << " TASK LIST\n#################";
+  std::cout << "### TASK LIST ###\n";
   for (const Assignment assignment : assignments_) {
-    assignment.print();
+    const Course* temp = GetCourseById(assignment.GetCourseId());
+    if (temp == nullptr) {
+      std::cout << "Course with id: " << assignment.GetCourseId()
+                << " doesnt exist\n";
+    } else {
+      std::cout << Colors::to_ansi(temp->GetColour());
+      std::cout << temp->GetName() << "\t";
+      assignment.print();
+      std::cout << Colors::to_ansi(CourseColour::Default);
+    }
   }
   std::cout << "\n###############\n";
 }
@@ -74,6 +89,53 @@ void Manager::ShowCourses() const {
     course.Print();
   }
   std::cout << "\n###############\n";
+}
+
+// return id that matches course name. Return 0 when course doesnt exist
+int Manager::GetCourseIdByName(const std::string& name) const {
+  for (const Course& course : courses_) {
+    if (name == course.GetName()) {
+      return course.GetId();
+    }
+  }
+
+  return 0;
+}
+
+const Course* Manager::GetCourseById(const int id) const {
+  for (const Course& course : courses_) {
+    if (course.GetId() == id) {
+      return &course;
+    }
+  }
+  return nullptr;
+}
+
+Assignment* Manager::GetAssignmentById(const int id) {
+  for (Assignment& assignment : assignments_) {
+    if (assignment.GetId() == id) {
+      return &assignment;
+    }
+  }
+  return nullptr;
+}
+
+const Assignment* Manager::GetAssignmentById(const int id) const {
+  for (const Assignment& assignment : assignments_) {
+    if (assignment.GetId() == id) {
+      return &assignment;
+    }
+  }
+  return nullptr;
+}
+
+void Manager::CompleteAssignmentById(const int id) {
+  Assignment* assignment = GetAssignmentById(id);
+  if (assignment == nullptr) {
+    std::cerr << "Assignment with id: " << id << " doesnt exist\n";
+  } else {
+    assignment->ToggleCompleted();
+  }
 }
 
 bool Manager::LoadData(const std::string& filename) {

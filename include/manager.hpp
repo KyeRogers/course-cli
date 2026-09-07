@@ -12,14 +12,19 @@ class Manager {
     public: 
         Manager();
         
-        void AddTask(const std::string& name, const int course_id, const std::string& due_date);
+        bool AddTask(const std::string& name, const std::string& course, const std::string& due_date);
         void AddCourse(const std::string& name, const CourseColour colour);
         bool SaveData(const std::string& filename) const;
 
         void ShowAssignments() const;
         void ShowCourses() const;
 
-        int GetCourseId(const std::string& name) const;
+        int GetCourseIdByName(const std::string& name) const;
+        const Course* GetCourseById(const int id) const;
+        Assignment* GetAssignmentById(const int id);
+        const Assignment* GetAssignmentById(const int id) const;
+
+        void CompleteAssignmentById(const int id);
     private:
         std::vector<Assignment> assignments_;
         std::vector<Course> courses_;

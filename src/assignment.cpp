@@ -34,8 +34,9 @@ const std::string& Assignment::GetDueDate() const { return due_date_; }
 const bool Assignment::GetCompleted() const { return completed_; }
 
 void Assignment::print() const {
-  std::cout << name_ << std::endl;
-  std::cout << "ID: " << id_ << "\n";
-  std::cout << "DUE BY: " << due_date_ << std::endl;
-  std::cout << (completed_ ? "Complete" : "Incomplete") << std::endl;
+  std::cout << "[" << id_ << "]: " << name_ << " due by: " << due_date_ << (completed_ ? " COMPLETED" : " PENDING") << std::endl; 
+}
+
+void Assignment::ToggleCompleted() {
+  completed_ = !completed_;
 }

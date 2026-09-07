@@ -15,6 +15,7 @@ class Assignment {
         const std::string& GetDueDate() const;
         const bool GetCompleted() const;
         
+        void ToggleCompleted();
         
         void print() const;
     private:
