@@ -45,7 +45,7 @@ namespace Colors {
         if (color_str == "Cyan" || color_str == "cyan")        return CourseColour::Cyan;
         if (color_str == "White" || color_str == "white")       return CourseColour::White;
         if (color_str == "Gray" || color_str == "gray")        return CourseColour::BrightBlack;
-        if (color_str == "BrightBlue" || color_str == "brightbluej")  return CourseColour::BrightBlue;
+        if (color_str == "BrightBlue" || color_str == "brightblue")  return CourseColour::BrightBlue;
         
         return CourseColour::Default;
     }

@@ -4,6 +4,37 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <system_error>
+#include <format>
+
+namespace {
+
+std::chrono::year_month_day Today() {
+  const auto now =
+      std::chrono::floor<std::chrono::days>(std::chrono::system_clock::now());
+  return std::chrono::year_month_day{now};
+}
+
+std::string FormatDate(const std::chrono::year_month_day date) {
+  const auto year = static_cast<int>(date.year());
+  const auto month = static_cast<unsigned>(date.month());
+  const auto day = static_cast<unsigned>(date.day());
+  return std::format("{:04}-{:02}-{:02}", year, month, day);
+}
+
+std::string ResolveDate(const std::string& date) {
+  const auto today = std::chrono::sys_days{Today()};
+  if (date == "today") {
+    return FormatDate(Today());
+  }
+  if (date == "tomorrow") {
+    return FormatDate(
+        std::chrono::year_month_day{today + std::chrono::days{1}});
+  }
+  return date;
+}
+
+}  // namespace
+
 Manager::Manager()
     : assignments_{std::vector<Assignment>(0)},
       courses_{std::vector<Course>(0)},
@@ -15,14 +46,21 @@ Manager::Manager()
 }
 
 bool Manager::AddTask(const std::string& name, const std::string& course,
-                      const std::string& due_date) {
+                      std::string& due_date, const std::string& due_time) {
   int course_id = GetCourseIdByName(course);
   if (course_id == 0) {
     std::cerr << name << " doesnt exist\n";
     return false;
   } else {
+    if (due_date == "today" || due_date == "Today") {
+      due_date = FormatDate(Today());
+    } else if (due_date == "tomorrow" || due_date == "Tomorrow") {
+      const auto tomorrow = std::chrono::sys_days{Today()} + std::chrono::days{1};
+      due_date = FormatDate(std::chrono::year_month_day{tomorrow});
+    }
+
     Assignment new_assignment(last_assignment_id_ + 1, course_id, name,
-                              due_date);
+                              due_date, due_time);
     assignments_.push_back(new_assignment);
     last_assignment_id_++;
     return true;
@@ -57,6 +95,7 @@ bool Manager::SaveData(const std::string& filename) const {
          {"course_id", assignment.GetCourseId()},
          {"name", assignment.GetName()},
          {"due_date", assignment.GetDueDate()},
+         {"due_time", assignment.GetDueTime()},
          {"completed", assignment.GetCompleted()}});
   }
 
@@ -181,6 +220,7 @@ bool Manager::LoadData(const std::string& filename) {
                           assignment_data.at("course_id").get<int>(),
                           assignment_data.at("name").get<std::string>(),
                           assignment_data.at("due_date").get<std::string>(),
+                          assignment_data.at("due_time").get<std::string>(),
                           assignment_data.at("completed").get<bool>());
     assignments_.push_back(assignment);
   }
@@ -192,3 +232,84 @@ bool Manager::LoadData(const std::string& filename) {
   }
   return true;
 }
+
+void Manager::ShowAssignmentsForDate(const std::string& date) const {
+  const std::string resolved_date = ResolveDate(date);
+  std::cout << "### TASK LIST FOR " << resolved_date << " ###\n";
+  for (const Assignment assignment : assignments_) {
+    if (assignment.GetDueDate() == resolved_date) {
+      const Course* temp = GetCourseById(assignment.GetCourseId());
+      if (temp == nullptr) {
+        std::cout << "Course with id: " << assignment.GetCourseId()
+                  << " doesnt exist\n";
+      } else {
+        std::cout << Colors::to_ansi(temp->GetColour());
+        std::cout << temp->GetName() << "\t";
+        assignment.print();
+        std::cout << Colors::to_ansi(CourseColour::Default);
+      }
+    }
+  }
+  std::cout << "\n###############\n";
+}
+
+void Manager::ShowAssignmentsForCourse(const std::string& course) const {
+  std::cout << "### TASK LIST FOR COURSE: " << course << " ###\n";
+  int course_id = GetCourseIdByName(course);
+  if (course_id == 0) {
+    std::cerr << course << " doesnt exist\n";
+    return;
+  }
+  for (const Assignment assignment : assignments_) {
+    if (assignment.GetCourseId() == course_id) {
+      const Course* temp = GetCourseById(assignment.GetCourseId());
+      if (temp == nullptr) {
+        std::cout << "Course with id: " << assignment.GetCourseId()
+                  << " doesnt exist\n";
+      } else {
+        std::cout << Colors::to_ansi(temp->GetColour());
+        std::cout << temp->GetName() << "\t";
+        assignment.print();
+        std::cout << Colors::to_ansi(CourseColour::Default);
+      }
+    }
+  }
+  std::cout << "\n###############\n";
+}
+
+void Manager::ShowAssignmentsInRange(const std::string& start_date,
+                                     const std::string& end_date) const {
+  const std::string resolved_start = ResolveDate(start_date);
+  std::string resolved_end = ResolveDate(end_date);
+  if (end_date == "week") {
+    const auto week_end = std::chrono::sys_days{Today()} + std::chrono::days{7};
+    resolved_end = FormatDate(std::chrono::year_month_day{week_end});
+  }
+
+  std::cout << "### TASK LIST FOR RANGE: " << resolved_start << " to "
+            << resolved_end << " ###\n";
+  for (const Assignment assignment : assignments_) {
+    if (assignment.GetDueDate() >= resolved_start &&
+        assignment.GetDueDate() <= resolved_end) {
+      const Course* temp = GetCourseById(assignment.GetCourseId());
+      if (temp == nullptr) {
+        std::cout << "Course with id: " << assignment.GetCourseId()
+                  << " doesnt exist\n";
+      } else {
+        std::cout << Colors::to_ansi(temp->GetColour());
+        std::cout << temp->GetName() << "\t";
+        assignment.print();
+        std::cout << Colors::to_ansi(CourseColour::Default);
+      }
+    }
+  }
+  std::cout << "\n###############\n";
+}
+
+// TODO: add a helper to group tasks by day/week using std::chrono date keys.
+// TODO: add a function that returns assignments within [start, end] for: today,
+// tomorrow, next 7 days.
+// TODO: add date-range rendering such as ShowCalendarForDays(7) and
+// ShowTasksForDay(date).
+// TODO: expose a quick CLI path without the menu, e.g. "course-cli today" or
+// "course-cli week".
