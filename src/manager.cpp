@@ -168,12 +168,14 @@ const Assignment* Manager::GetAssignmentById(const int id) const {
   return nullptr;
 }
 
-void Manager::CompleteAssignmentById(const int id) {
+bool Manager::CompleteAssignmentById(const int id) {
   Assignment* assignment = GetAssignmentById(id);
   if (assignment == nullptr) {
     std::cerr << "Assignment with id: " << id << " doesnt exist\n";
+    return false;
   } else {
     assignment->ToggleCompleted();
+    return true;
   }
 }
 
