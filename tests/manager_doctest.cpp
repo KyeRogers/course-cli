@@ -197,3 +197,34 @@ TEST_CASE("manager can complete an assignment") {
   std::filesystem::current_path(previous);
   std::filesystem::remove_all(temp_dir);
 }
+
+TEST_CASE("deleting a course deletes its assignments") {
+  const auto previous = std::filesystem::current_path();
+  const auto temp_dir = std::filesystem::temp_directory_path() /
+                        std::filesystem::path("coursecli-manager-tests-delete-course");
+
+  std::filesystem::remove_all(temp_dir);
+  std::filesystem::create_directories(temp_dir / "data");
+  std::filesystem::current_path(temp_dir);
+  WriteJson(R"({
+    "courses": [
+      {"id": 1, "name": "maths", "colour": "Blue"},
+      {"id": 2, "name": "physics", "colour": "Red"}
+    ],
+    "assignments": [
+      {"id": 1, "course_id": 1, "name": "maths task", "due_date": "2026-09-12", "due_time": "09:00", "completed": false},
+      {"id": 2, "course_id": 2, "name": "physics task", "due_date": "2026-09-12", "due_time": "10:00", "completed": false}
+    ]
+  })");
+
+  Manager manager;
+  manager.DeleteCourse(1);
+
+  CHECK(manager.GetCourseById(1) == nullptr);
+  CHECK(manager.GetAssignmentById(1) == nullptr);
+  CHECK(manager.GetCourseById(2) != nullptr);
+  CHECK(manager.GetAssignmentById(2) != nullptr);
+
+  std::filesystem::current_path(previous);
+  std::filesystem::remove_all(temp_dir);
+}

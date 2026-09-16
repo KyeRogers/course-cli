@@ -25,8 +25,12 @@ class Manager {
         
         int GetCourseIdByName(const std::string& name) const;
         const Course* GetCourseById(const int id) const;
+        const std::vector<Course>& GetCourses() const;
+        const std::vector<Assignment>& GetAssignments() const;
         Assignment* GetAssignmentById(const int id);
         const Assignment* GetAssignmentById(const int id) const;
+
+        void DeleteCourse(const int course_id);
 
         bool CompleteAssignmentById(const int id);
     private:

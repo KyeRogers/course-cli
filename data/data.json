@@ -1,0 +1,619 @@
+{
+  "assignments": [
+    {
+      "completed": true,
+      "course_id": 1,
+      "due_date": "2026-09-18",
+      "due_time": "18:00",
+      "id": 1,
+      "name": "Algebra worksheet"
+    },
+    {
+      "completed": false,
+      "course_id": 2,
+      "due_date": "2026-09-20",
+      "due_time": "23:59",
+      "id": 2,
+      "name": "CLI project"
+    },
+    {
+      "completed": false,
+      "course_id": 3,
+      "due_date": "2026-09-12",
+      "due_time": "12:00",
+      "id": 3,
+      "name": "Lab report"
+    },
+    {
+      "completed": false,
+      "course_id": 3,
+      "due_date": "2026-12-11",
+      "due_time": "",
+      "id": 4,
+      "name": "practica1"
+    },
+    {
+      "completed": true,
+      "course_id": 4,
+      "due_date": "2026-09-25",
+      "due_time": "09:00",
+      "id": 5,
+      "name": "Stoichiometry Quiz"
+    },
+    {
+      "completed": false,
+      "course_id": 5,
+      "due_date": "2026-10-02",
+      "due_time": "23:59",
+      "id": 6,
+      "name": "French Revolution Essay"
+    },
+    {
+      "completed": false,
+      "course_id": 6,
+      "due_date": "2026-09-19",
+      "due_time": "15:00",
+      "id": 7,
+      "name": "Shakespeare Reading"
+    },
+    {
+      "completed": true,
+      "course_id": 7,
+      "due_date": "2026-09-22",
+      "due_time": "11:30",
+      "id": 8,
+      "name": "Mitosis Diagram"
+    },
+    {
+      "completed": false,
+      "course_id": 8,
+      "due_date": "2026-10-05",
+      "due_time": "",
+      "id": 9,
+      "name": "Perspective Drawing"
+    },
+    {
+      "completed": false,
+      "course_id": 9,
+      "due_date": "2026-09-28",
+      "due_time": "14:00",
+      "id": 10,
+      "name": "Market Supply Analysis"
+    },
+    {
+      "completed": true,
+      "course_id": 10,
+      "due_date": "2026-10-01",
+      "due_time": "08:00",
+      "id": 11,
+      "name": "Ethics Summary"
+    },
+    {
+      "completed": false,
+      "course_id": 1,
+      "due_date": "2026-09-24",
+      "due_time": "17:00",
+      "id": 12,
+      "name": "Calculus Practice"
+    },
+    {
+      "completed": true,
+      "course_id": 2,
+      "due_date": "2026-09-29",
+      "due_time": "23:59",
+      "id": 13,
+      "name": "Array Sorting Script"
+    },
+    {
+      "completed": false,
+      "course_id": 3,
+      "due_date": "2026-10-04",
+      "due_time": "12:00",
+      "id": 14,
+      "name": "Thermodynamics Homework"
+    },
+    {
+      "completed": false,
+      "course_id": 4,
+      "due_date": "2026-09-30",
+      "due_time": "",
+      "id": 15,
+      "name": "Acid-Base Lab Data"
+    },
+    {
+      "completed": false,
+      "course_id": 5,
+      "due_date": "2026-10-08",
+      "due_time": "23:59",
+      "id": 16,
+      "name": "WWI Timeline"
+    },
+    {
+      "completed": true,
+      "course_id": 6,
+      "due_date": "2026-09-27",
+      "due_time": "16:00",
+      "id": 17,
+      "name": "Poetry Analysis"
+    },
+    {
+      "completed": false,
+      "course_id": 7,
+      "due_date": "2026-10-03",
+      "due_time": "21:00",
+      "id": 18,
+      "name": "Genetics Problems"
+    },
+    {
+      "completed": true,
+      "course_id": 8,
+      "due_date": "2026-09-21",
+      "due_time": "10:00",
+      "id": 19,
+      "name": "Color Wheel Project"
+    },
+    {
+      "completed": false,
+      "course_id": 9,
+      "due_date": "2026-10-07",
+      "due_time": "13:00",
+      "id": 20,
+      "name": "GDP Growth Chart"
+    },
+    {
+      "completed": false,
+      "course_id": 10,
+      "due_date": "2026-09-23",
+      "due_time": "23:59",
+      "id": 21,
+      "name": "Socrates Discussion Post"
+    },
+    {
+      "completed": false,
+      "course_id": 1,
+      "due_date": "2026-10-10",
+      "due_time": "18:00",
+      "id": 22,
+      "name": "Geometry Proofs"
+    },
+    {
+      "completed": true,
+      "course_id": 2,
+      "due_date": "2026-10-06",
+      "due_time": "22:00",
+      "id": 23,
+      "name": "OOP Inheritance Lab"
+    },
+    {
+      "completed": false,
+      "course_id": 3,
+      "due_date": "2026-10-12",
+      "due_time": "12:00",
+      "id": 24,
+      "name": "Optics Simulation"
+    },
+    {
+      "completed": true,
+      "course_id": 4,
+      "due_date": "2026-10-02",
+      "due_time": "09:00",
+      "id": 25,
+      "name": "Periodic Table Review"
+    },
+    {
+      "completed": false,
+      "course_id": 5,
+      "due_date": "2026-10-15",
+      "due_time": "",
+      "id": 26,
+      "name": "Cold War Essay Draft"
+    },
+    {
+      "completed": false,
+      "course_id": 6,
+      "due_date": "2026-10-01",
+      "due_time": "11:00",
+      "id": 27,
+      "name": "Novel Chapter 1-5 Quiz"
+    },
+    {
+      "completed": false,
+      "course_id": 7,
+      "due_date": "2026-10-14",
+      "due_time": "23:59",
+      "id": 28,
+      "name": "Ecosystem Case Study"
+    },
+    {
+      "completed": true,
+      "course_id": 8,
+      "due_date": "2026-10-09",
+      "due_time": "14:00",
+      "id": 29,
+      "name": "Sculpture Sketch"
+    },
+    {
+      "completed": false,
+      "course_id": 9,
+      "due_date": "2026-10-11",
+      "due_time": "16:30",
+      "id": 30,
+      "name": "Inflation Case Study"
+    },
+    {
+      "completed": false,
+      "course_id": 10,
+      "due_date": "2026-10-20",
+      "due_time": "23:59",
+      "id": 31,
+      "name": "Existentialism Paper"
+    },
+    {
+      "completed": true,
+      "course_id": 1,
+      "due_date": "2026-10-13",
+      "due_time": "18:00",
+      "id": 32,
+      "name": "Trigonometry Problems"
+    },
+    {
+      "completed": false,
+      "course_id": 2,
+      "due_date": "2026-10-16",
+      "due_time": "23:59",
+      "id": 33,
+      "name": "Pointer Memory Map"
+    },
+    {
+      "completed": true,
+      "course_id": 3,
+      "due_date": "2026-10-09",
+      "due_time": "12:00",
+      "id": 34,
+      "name": "Kinematics Worksheet"
+    },
+    {
+      "completed": false,
+      "course_id": 4,
+      "due_date": "2026-10-18",
+      "due_time": "09:00",
+      "id": 35,
+      "name": "Gas Laws Problems"
+    },
+    {
+      "completed": false,
+      "course_id": 5,
+      "due_date": "2026-10-22",
+      "due_time": "",
+      "id": 36,
+      "name": "Roman Empire Map Work"
+    },
+    {
+      "completed": true,
+      "course_id": 6,
+      "due_date": "2026-10-11",
+      "due_time": "15:00",
+      "id": 37,
+      "name": "Character Analysis Paragraph"
+    },
+    {
+      "completed": false,
+      "course_id": 7,
+      "due_date": "2026-10-21",
+      "due_time": "20:00",
+      "id": 38,
+      "name": "Cell Membrane Lab"
+    },
+    {
+      "completed": false,
+      "course_id": 8,
+      "due_date": "2026-10-26",
+      "due_time": "10:00",
+      "id": 39,
+      "name": "Still Life Painting"
+    },
+    {
+      "completed": true,
+      "course_id": 9,
+      "due_date": "2026-10-19",
+      "due_time": "14:00",
+      "id": 40,
+      "name": "Microeconomics Quiz"
+    },
+    {
+      "completed": false,
+      "course_id": 10,
+      "due_date": "2026-10-25",
+      "due_time": "23:59",
+      "id": 41,
+      "name": "Plato's Republic Reflection"
+    },
+    {
+      "completed": false,
+      "course_id": 1,
+      "due_date": "2026-10-27",
+      "due_time": "18:00",
+      "id": 42,
+      "name": "Linear Algebra Set"
+    },
+    {
+      "completed": true,
+      "course_id": 2,
+      "due_date": "2026-10-23",
+      "due_time": "23:59",
+      "id": 43,
+      "name": "Vector Assignment Performance"
+    },
+    {
+      "completed": false,
+      "course_id": 3,
+      "due_date": "2026-10-28",
+      "due_time": "12:00",
+      "id": 44,
+      "name": "Vector Force Lab"
+    },
+    {
+      "completed": false,
+      "course_id": 4,
+      "due_date": "2026-10-30",
+      "due_time": "",
+      "id": 45,
+      "name": "Molarity Lab Calculations"
+    },
+    {
+      "completed": true,
+      "course_id": 5,
+      "due_date": "2026-11-02",
+      "due_time": "23:59",
+      "id": 46,
+      "name": "Renaissance Artist Profile"
+    },
+    {
+      "completed": false,
+      "course_id": 6,
+      "due_date": "2026-10-24",
+      "due_time": "16:00",
+      "id": 47,
+      "name": "Grammar Quiz 2"
+    },
+    {
+      "completed": false,
+      "course_id": 7,
+      "due_date": "2026-11-01",
+      "due_time": "22:00",
+      "id": 48,
+      "name": "Enzyme Graphing Assignment"
+    },
+    {
+      "completed": true,
+      "course_id": 8,
+      "due_date": "2026-10-29",
+      "due_time": "11:00",
+      "id": 49,
+      "name": "Art Exhibition Review"
+    },
+    {
+      "completed": false,
+      "course_id": 9,
+      "due_date": "2026-11-04",
+      "due_time": "13:00",
+      "id": 50,
+      "name": "Monopoly Market Reading"
+    },
+    {
+      "completed": true,
+      "course_id": 10,
+      "due_date": "2026-11-03",
+      "due_time": "23:59",
+      "id": 51,
+      "name": "Logic Truth Tables"
+    },
+    {
+      "completed": false,
+      "course_id": 1,
+      "due_date": "2026-11-09",
+      "due_time": "18:00",
+      "id": 52,
+      "name": "Probability Worksheet"
+    },
+    {
+      "completed": false,
+      "course_id": 2,
+      "due_date": "2026-11-06",
+      "due_time": "23:59",
+      "id": 53,
+      "name": "String Parser Project"
+    },
+    {
+      "completed": true,
+      "course_id": 3,
+      "due_date": "2026-11-12",
+      "due_time": "12:00",
+      "id": 54,
+      "name": "Electromagnetism Quiz"
+    },
+    {
+      "completed": false,
+      "course_id": 4,
+      "due_date": "2026-11-08",
+      "due_time": "09:00",
+      "id": 55,
+      "name": "Chemical Equations Exam"
+    },
+    {
+      "completed": false,
+      "course_id": 5,
+      "due_date": "2026-11-15",
+      "due_time": "",
+      "id": 56,
+      "name": "Industrial Revolution Sources"
+    },
+    {
+      "completed": true,
+      "course_id": 6,
+      "due_date": "2026-11-07",
+      "due_time": "15:00",
+      "id": 57,
+      "name": "Essay Thesis Statement"
+    },
+    {
+      "completed": false,
+      "course_id": 7,
+      "due_date": "2026-11-13",
+      "due_time": "20:00",
+      "id": 58,
+      "name": "Plant Cell Micrograph Lab"
+    },
+    {
+      "completed": false,
+      "course_id": 8,
+      "due_date": "2026-11-18",
+      "due_time": "10:00",
+      "id": 59,
+      "name": "Charcoal Portrait"
+    },
+    {
+      "completed": true,
+      "course_id": 9,
+      "due_date": "2026-11-11",
+      "due_time": "14:00",
+      "id": 60,
+      "name": "Fiscal Policy Debate Prep"
+    },
+    {
+      "completed": false,
+      "course_id": 10,
+      "due_date": "2026-11-17",
+      "due_time": "23:59",
+      "id": 61,
+      "name": "Free Will Critique"
+    },
+    {
+      "completed": true,
+      "course_id": 1,
+      "due_date": "2026-11-20",
+      "due_time": "18:00",
+      "id": 62,
+      "name": "Statistics Project"
+    },
+    {
+      "completed": false,
+      "course_id": 2,
+      "due_date": "2026-11-24",
+      "due_time": "23:59",
+      "id": 63,
+      "name": "Binary Tree Challenge"
+    },
+    {
+      "completed": false,
+      "course_id": 3,
+      "due_date": "2026-11-22",
+      "due_time": "12:00",
+      "id": 64,
+      "name": "Wave Mechanics HW"
+    },
+    {
+      "completed": true,
+      "course_id": 4,
+      "due_date": "2026-11-25",
+      "due_time": "",
+      "id": 65,
+      "name": "Thermochemistry Review"
+    },
+    {
+      "completed": false,
+      "course_id": 5,
+      "due_date": "2026-11-28",
+      "due_time": "23:59",
+      "id": 66,
+      "name": "Civil War Causes Matrix"
+    },
+    {
+      "completed": false,
+      "course_id": 6,
+      "due_date": "2026-11-19",
+      "due_time": "16:00",
+      "id": 67,
+      "name": "Peer Review Workshop"
+    },
+    {
+      "completed": true,
+      "course_id": 7,
+      "due_date": "2026-11-27",
+      "due_time": "21:00",
+      "id": 68,
+      "name": "Human Anatomy Mock Quiz"
+    },
+    {
+      "completed": false,
+      "course_id": 8,
+      "due_date": "2026-11-21",
+      "due_time": "10:00",
+      "id": 69,
+      "name": "Clay Sculpture Plan"
+    },
+    {
+      "completed": false,
+      "course_id": 9,
+      "due_date": "2026-12-02",
+      "due_time": "13:00",
+      "id": 70,
+      "name": "Trade Tariffs Reflection"
+    },
+    {
+      "completed": true,
+      "course_id": 10,
+      "due_date": "2026-11-23",
+      "due_time": "23:59",
+      "id": 71,
+      "name": "Dualism Argument Outline"
+    }
+  ],
+  "courses": [
+    {
+      "colour": "Blue",
+      "id": 1,
+      "name": "Mathematics"
+    },
+    {
+      "colour": "Green",
+      "id": 2,
+      "name": "Programming"
+    },
+    {
+      "colour": "Red",
+      "id": 3,
+      "name": "Physics"
+    },
+    {
+      "colour": "Yellow",
+      "id": 4,
+      "name": "Chemistry"
+    },
+    {
+      "colour": "Default",
+      "id": 5,
+      "name": "History"
+    },
+    {
+      "colour": "Default",
+      "id": 6,
+      "name": "Literature"
+    },
+    {
+      "colour": "Default",
+      "id": 7,
+      "name": "Biology"
+    },
+    {
+      "colour": "Default",
+      "id": 8,
+      "name": "Art"
+    },
+    {
+      "colour": "Default",
+      "id": 9,
+      "name": "Economics"
+    }
+  ]
+}

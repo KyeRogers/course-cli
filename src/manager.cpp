@@ -1,5 +1,6 @@
 #include "../include/manager.hpp"
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -40,7 +41,7 @@ Manager::Manager()
       courses_{std::vector<Course>(0)},
       last_assignment_id_{0},
       last_course_id_{0} {
-  if (!LoadData("data/data.json")) {
+  if (!LoadData("../data/data.json")) {
     std::exit(0);
   }
 }
@@ -76,7 +77,7 @@ void Manager::AddCourse(const std::string& name, const CourseColour colour) {
 bool Manager::SaveData(const std::string& filename) const {
   std::ofstream output_file(filename);
   if (!output_file) {
-    std::perror("Error loading file to save data");
+    std::perror("Error loading file to s  data");
     return false;
   }
 
@@ -148,6 +149,10 @@ const Course* Manager::GetCourseById(const int id) const {
     }
   }
   return nullptr;
+}
+
+const std::vector<Assignment>& Manager::GetAssignments() const {
+  return assignments_;
 }
 
 Assignment* Manager::GetAssignmentById(const int id) {
@@ -308,10 +313,24 @@ void Manager::ShowAssignmentsInRange(const std::string& start_date,
   std::cout << "\n###############\n";
 }
 
-// TODO: add a helper to group tasks by day/week using std::chrono date keys.
-// TODO: add a function that returns assignments within [start, end] for: today,
-// tomorrow, next 7 days.
-// TODO: add date-range rendering such as ShowCalendarForDays(7) and
-// ShowTasksForDay(date).
-// TODO: expose a quick CLI path without the menu, e.g. "course-cli today" or
-// "course-cli week".
+const std::vector<Course>& Manager::GetCourses() const {
+  return courses_;
+}
+
+void Manager::DeleteCourse(const int course_id) {
+  const auto course = std::find_if(
+        courses_.begin(), courses_.end(), [course_id](const Course& course) {
+        return course.GetId() == course_id;
+      });
+  if (course == courses_.end()) {
+    return;
+  }
+
+  courses_.erase(course);
+  assignments_.erase(
+      std::remove_if(assignments_.begin(), assignments_.end(),
+                     [course_id](const Assignment& assignment) {
+                       return assignment.GetCourseId() == course_id;
+                     }),
+      assignments_.end());
+}
