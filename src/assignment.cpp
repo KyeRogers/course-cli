@@ -1,10 +1,23 @@
 #include "../include/assignment.hpp"
 
 #include <chrono>
+#include <ctime>
 #include <iostream>
 #include <stdexcept>
 
 namespace {
+
+std::string ReadableDate(const std::string& value) {
+  std::tm date{};
+  date.tm_year = std::stoi(value.substr(0, 4)) - 1900;
+  date.tm_mon = std::stoi(value.substr(5, 2)) - 1;
+  date.tm_mday = std::stoi(value.substr(8, 2));
+  date.tm_hour = 12;
+  std::mktime(&date);
+  char output[64]{};
+  std::strftime(output, sizeof(output), "%A %d %B", &date);
+  return output;
+}
 
 std::chrono::year_month_day Today() {
   const auto now = std::chrono::floor<std::chrono::days>(
@@ -20,7 +33,8 @@ Assignment::Assignment()
       name_{"NULL"},
       due_date_{"NULL"},
       due_time_{},
-      completed_{false} {}
+      completed_{false},
+      priority_{AssignmentPriority::Normal} {}
 
 Assignment::Assignment(const int id, const int course_id,
                        const std::string& name, const std::string& due_date)
@@ -34,7 +48,8 @@ Assignment::Assignment(const int id, const int course_id,
       name_{name},
       due_date_{due_date},
       due_time_{due_time},
-      completed_{false} {}
+      completed_{false},
+      priority_{AssignmentPriority::Normal} {}
 
     Assignment::Assignment(const int id, const int course_id,
                const std::string& name, const std::string& due_date,
@@ -49,7 +64,8 @@ Assignment::Assignment(const int id, const int course_id,
       name_{name},
       due_date_{due_date},
       due_time_{due_time},
-      completed_{completed} {}
+      completed_{completed},
+      priority_{AssignmentPriority::Normal} {}
 
 // getters
 int Assignment::GetId() const { return id_; }
@@ -58,9 +74,22 @@ const std::string& Assignment::GetName() const { return name_; }
 const std::string& Assignment::GetDueDate() const { return due_date_; }
 const std::string& Assignment::GetDueTime() const { return due_time_; }
 const bool Assignment::GetCompleted() const { return completed_; }
+AssignmentPriority Assignment::GetPriority() const { return priority_; }
+
+void Assignment::SetDetails(const std::string& name, const int course_id,
+                            const std::string& due_date,
+                            const std::string& due_time,
+                            const AssignmentPriority priority) {
+  name_ = name;
+  course_id_ = course_id;
+  due_date_ = due_date;
+  due_time_ = due_time;
+  priority_ = priority;
+}
 
 void Assignment::print() const {
-  std::cout << "[" << id_ << "]: " << name_ << " due by: " << due_date_
+  std::cout << "[" << id_ << "]: " << name_ << " due by: "
+            << ReadableDate(due_date_)
             << (completed_ ? " COMPLETED" : " PENDING") << std::endl;
 }
 

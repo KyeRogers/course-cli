@@ -1,6 +1,7 @@
 #include "../include/manager.hpp"
 
 #include <algorithm>
+#include <ctime>
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -8,6 +9,25 @@
 #include <format>
 
 namespace {
+
+std::string ReadableDate(const std::string& value) {
+  try {
+    int year = std::stoi(value.substr(0, 4));
+    int month = std::stoi(value.substr(5, 2));
+    int day = std::stoi(value.substr(8, 2));
+    std::tm date{};
+    date.tm_year = year - 1900;
+    date.tm_mon = month - 1;
+    date.tm_mday = day;
+    date.tm_hour = 12;
+    std::mktime(&date);
+    char output[64]{};
+    std::strftime(output, sizeof(output), "%A %d %B", &date);
+    return output;
+  } catch (const std::exception&) {
+    return value;
+  }
+}
 
 std::chrono::year_month_day Today() {
   const auto now =
@@ -47,7 +67,8 @@ Manager::Manager()
 }
 
 bool Manager::AddTask(const std::string& name, const std::string& course,
-                      std::string& due_date, const std::string& due_time) {
+                      std::string& due_date, const std::string& due_time,
+                      const AssignmentPriority priority) {
   int course_id = GetCourseIdByName(course);
   if (course_id == 0) {
     std::cerr << name << " doesnt exist\n";
@@ -62,6 +83,7 @@ bool Manager::AddTask(const std::string& name, const std::string& course,
 
     Assignment new_assignment(last_assignment_id_ + 1, course_id, name,
                               due_date, due_time);
+    new_assignment.SetDetails(name, course_id, due_date, due_time, priority);
     assignments_.push_back(new_assignment);
     last_assignment_id_++;
     return true;
@@ -97,6 +119,11 @@ bool Manager::SaveData(const std::string& filename) const {
          {"name", assignment.GetName()},
          {"due_date", assignment.GetDueDate()},
          {"due_time", assignment.GetDueTime()},
+           {"priority", assignment.GetPriority() == AssignmentPriority::High
+                ? "high"
+                : assignment.GetPriority() == AssignmentPriority::Low
+                  ? "low"
+                  : "normal"},
          {"completed", assignment.GetCompleted()}});
   }
 
@@ -184,6 +211,50 @@ bool Manager::CompleteAssignmentById(const int id) {
   }
 }
 
+bool Manager::UpdateAssignment(const int id, const std::string& name,
+                               const std::string& course,
+                               const std::string& due_date,
+                               const std::string& due_time,
+                               const AssignmentPriority priority) {
+  Assignment* assignment = GetAssignmentById(id);
+  const int course_id = GetCourseIdByName(course);
+  if (assignment == nullptr || course_id == 0 || name.empty() || due_date.empty()) {
+    return false;
+  }
+
+  assignment->SetDetails(name, course_id, due_date, due_time, priority);
+  return true;
+}
+
+int Manager::RemoveCompletedOlderThanDays(const int days) {
+  if (days < 0) {
+    return 0;
+  }
+
+  const auto today = std::chrono::floor<std::chrono::days>(
+      std::chrono::system_clock::now());
+  const auto cutoff = std::chrono::sys_days{today} - std::chrono::days{days};
+  const auto previous_size = assignments_.size();
+
+  assignments_.erase(
+      std::remove_if(assignments_.begin(), assignments_.end(),
+                     [&](const Assignment& assignment) {
+                       if (!assignment.GetCompleted()) {
+                         return false;
+                       }
+
+                       try {
+                         return std::chrono::sys_days{assignment.GetDateKey()} <=
+                                cutoff;
+                       } catch (const std::exception&) {
+                         return false;
+                       }
+                     }),
+      assignments_.end());
+
+  return static_cast<int>(previous_size - assignments_.size());
+}
+
 bool Manager::LoadData(const std::string& filename) {
   std::ifstream input_file(filename);
   if (!input_file) {
@@ -229,6 +300,14 @@ bool Manager::LoadData(const std::string& filename) {
                           assignment_data.at("due_date").get<std::string>(),
                           assignment_data.at("due_time").get<std::string>(),
                           assignment_data.at("completed").get<bool>());
+    if (assignment_data.contains("priority")) {
+      const std::string priority = assignment_data.at("priority").get<std::string>();
+      assignment.SetDetails(assignment.GetName(), assignment.GetCourseId(),
+                            assignment.GetDueDate(), assignment.GetDueTime(),
+                            priority == "high" ? AssignmentPriority::High
+                            : priority == "low" ? AssignmentPriority::Low
+                                                 : AssignmentPriority::Normal);
+    }
     assignments_.push_back(assignment);
   }
   if (courses_.size() >= 1) {
@@ -240,10 +319,14 @@ bool Manager::LoadData(const std::string& filename) {
   return true;
 }
 
-void Manager::ShowAssignmentsForDate(const std::string& date) const {
+void Manager::ShowAssignmentsForDate(const std::string& date,
+                                     const bool show_completed) const {
   const std::string resolved_date = ResolveDate(date);
-  std::cout << "### TASK LIST FOR " << resolved_date << " ###\n";
+  std::cout << "### TASK LIST FOR " << ReadableDate(resolved_date) << " ###\n";
   for (const Assignment assignment : assignments_) {
+    if (!show_completed && assignment.GetCompleted()) {
+      continue;
+    }
     if (assignment.GetDueDate() == resolved_date) {
       const Course* temp = GetCourseById(assignment.GetCourseId());
       if (temp == nullptr) {
@@ -260,7 +343,8 @@ void Manager::ShowAssignmentsForDate(const std::string& date) const {
   std::cout << "\n###############\n";
 }
 
-void Manager::ShowAssignmentsForCourse(const std::string& course) const {
+void Manager::ShowAssignmentsForCourse(const std::string& course,
+                                       const bool show_completed) const {
   std::cout << "### TASK LIST FOR COURSE: " << course << " ###\n";
   int course_id = GetCourseIdByName(course);
   if (course_id == 0) {
@@ -268,6 +352,9 @@ void Manager::ShowAssignmentsForCourse(const std::string& course) const {
     return;
   }
   for (const Assignment assignment : assignments_) {
+    if (!show_completed && assignment.GetCompleted()) {
+      continue;
+    }
     if (assignment.GetCourseId() == course_id) {
       const Course* temp = GetCourseById(assignment.GetCourseId());
       if (temp == nullptr) {
@@ -285,7 +372,8 @@ void Manager::ShowAssignmentsForCourse(const std::string& course) const {
 }
 
 void Manager::ShowAssignmentsInRange(const std::string& start_date,
-                                     const std::string& end_date) const {
+                                     const std::string& end_date,
+                                     const bool show_completed) const {
   const std::string resolved_start = ResolveDate(start_date);
   std::string resolved_end = ResolveDate(end_date);
   if (end_date == "week") {
@@ -293,9 +381,12 @@ void Manager::ShowAssignmentsInRange(const std::string& start_date,
     resolved_end = FormatDate(std::chrono::year_month_day{week_end});
   }
 
-  std::cout << "### TASK LIST FOR RANGE: " << resolved_start << " to "
-            << resolved_end << " ###\n";
+  std::cout << "### TASK LIST FOR RANGE: " << ReadableDate(resolved_start)
+            << " to " << ReadableDate(resolved_end) << " ###\n";
   for (const Assignment assignment : assignments_) {
+    if (!show_completed && assignment.GetCompleted()) {
+      continue;
+    }
     if (assignment.GetDueDate() >= resolved_start &&
         assignment.GetDueDate() <= resolved_end) {
       const Course* temp = GetCourseById(assignment.GetCourseId());

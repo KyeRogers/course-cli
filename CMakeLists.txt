@@ -46,14 +46,6 @@ target_link_libraries(course-cli
     ftxui::component
 )
 
-add_executable(ftxui-demo src/ftxui_demo.cpp)
-target_link_libraries(ftxui-demo
-  PRIVATE
-    ftxui::screen
-    ftxui::dom
-    ftxui::component
-)
-
 if(BUILD_TESTING)
   find_package(doctest 2.4 QUIET)
   if(NOT TARGET doctest::doctest)

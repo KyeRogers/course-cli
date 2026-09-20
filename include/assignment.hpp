@@ -4,6 +4,8 @@
 #include <string>
 #include <chrono>
 
+enum class AssignmentPriority { Low, Normal, High };
+
 class Assignment {
  public:
   Assignment();
@@ -23,6 +25,10 @@ class Assignment {
   const std::string& GetDueDate() const;
   const std::string& GetDueTime() const;
   const bool GetCompleted() const;
+  AssignmentPriority GetPriority() const;
+  void SetDetails(const std::string& name, const int course_id,
+                  const std::string& due_date, const std::string& due_time,
+                  const AssignmentPriority priority);
 
   std::chrono::year_month_day GetDateKey() const;
   bool IsDueToday() const;
@@ -38,6 +44,7 @@ class Assignment {
   std::string due_date_; // (YYYYY-MM-DD) 
   std::string due_time_;  // optional, can be empty if not provided
   bool completed_;
+  AssignmentPriority priority_;
 };
 
 #endif
