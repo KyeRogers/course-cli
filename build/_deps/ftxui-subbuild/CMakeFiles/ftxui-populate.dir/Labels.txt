@@ -1,0 +1,14 @@
+# Target labels
+ ftxui-populate
+# Source files and their labels
+/home/kye/Escritorio/dev/projects/course-cli/build/_deps/ftxui-subbuild/CMakeFiles/ftxui-populate
+/home/kye/Escritorio/dev/projects/course-cli/build/_deps/ftxui-subbuild/CMakeFiles/ftxui-populate.rule
+/home/kye/Escritorio/dev/projects/course-cli/build/_deps/ftxui-subbuild/CMakeFiles/ftxui-populate-complete.rule
+/home/kye/Escritorio/dev/projects/course-cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-build.rule
+/home/kye/Escritorio/dev/projects/course-cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-configure.rule
+/home/kye/Escritorio/dev/projects/course-cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-download.rule
+/home/kye/Escritorio/dev/projects/course-cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-install.rule
+/home/kye/Escritorio/dev/projects/course-cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-mkdir.rule
+/home/kye/Escritorio/dev/projects/course-cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-patch.rule
+/home/kye/Escritorio/dev/projects/course-cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-test.rule
+/home/kye/Escritorio/dev/projects/course-cli/build/_deps/ftxui-subbuild/ftxui-populate-prefix/src/ftxui-populate-stamp/ftxui-populate-update.rule

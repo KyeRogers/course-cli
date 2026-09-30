@@ -4,8 +4,6 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
-#include <functional>
-#include <iostream>
 #include <sstream>
 #include <string>
 
@@ -46,15 +44,6 @@ void WriteJson(const std::string& json_text) {
   std::ofstream output_file("data/data.json");
   output_file << json_text;
   output_file.close();
-}
-
-template <typename Callback>
-std::string CaptureOutput(Callback callback) {
-  std::ostringstream output;
-  std::streambuf* old = std::cout.rdbuf(output.rdbuf());
-  callback();
-  std::cout.rdbuf(old);
-  return output.str();
 }
 
 std::string BuildJsonFixture() {
@@ -101,7 +90,7 @@ TEST_CASE("manager can add a task to an existing course") {
   std::filesystem::remove_all(temp_dir);
 }
 
-TEST_CASE("manager shows tasks for today") {
+TEST_CASE("manager filters a supplied assignment list for today") {
   const auto previous = std::filesystem::current_path();
   const auto temp_dir = std::filesystem::temp_directory_path() /
                        std::filesystem::path("coursecli-manager-tests-today");
@@ -126,16 +115,16 @@ TEST_CASE("manager shows tasks for today") {
 
   Manager manager;
 
-  std::string output = CaptureOutput([&manager]() { manager.ShowAssignmentsForDate("today"); });
-
-  CHECK(output.find("today task") != std::string::npos);
-  CHECK(output.find("later task") == std::string::npos);
+  const auto today_tasks = manager.FilterAssignmentsForDate(
+      manager.GetAssignments(), "today");
+  REQUIRE(today_tasks.size() == 1);
+  CHECK(today_tasks.front().GetName() == "today task");
 
   std::filesystem::current_path(previous);
   std::filesystem::remove_all(temp_dir);
 }
 
-TEST_CASE("manager shows tasks in a week range") {
+TEST_CASE("manager filters a supplied assignment list in a week range") {
   const auto previous = std::filesystem::current_path();
   const auto temp_dir = std::filesystem::temp_directory_path() /
                        std::filesystem::path("coursecli-manager-tests-week");
@@ -163,11 +152,11 @@ TEST_CASE("manager shows tasks in a week range") {
 
   Manager manager;
 
-  std::string output = CaptureOutput([&manager]() { manager.ShowAssignmentsInRange("today", "week"); });
-
-  CHECK(output.find("today task") != std::string::npos);
-  CHECK(output.find("nearby task") != std::string::npos);
-  CHECK(output.find("too late task") == std::string::npos);
+  const auto week_tasks = manager.FilterAssignmentsInRange(
+      manager.GetAssignments(), "today", "week");
+  REQUIRE(week_tasks.size() == 2);
+  CHECK(week_tasks[0].GetName() == "today task");
+  CHECK(week_tasks[1].GetName() == "nearby task");
 
   std::filesystem::current_path(previous);
   std::filesystem::remove_all(temp_dir);
@@ -224,6 +213,49 @@ TEST_CASE("deleting a course deletes its assignments") {
   CHECK(manager.GetAssignmentById(1) == nullptr);
   CHECK(manager.GetCourseById(2) != nullptr);
   CHECK(manager.GetAssignmentById(2) != nullptr);
+
+  std::filesystem::current_path(previous);
+  std::filesystem::remove_all(temp_dir);
+}
+
+TEST_CASE("assignment filters can be composed over a supplied vector") {
+  const auto previous = std::filesystem::current_path();
+  const auto temp_dir = std::filesystem::temp_directory_path() /
+                        std::filesystem::path("coursecli-manager-tests-filters");
+
+  std::filesystem::remove_all(temp_dir);
+  std::filesystem::create_directories(temp_dir / "data");
+  std::filesystem::current_path(temp_dir);
+
+  std::ostringstream json;
+  json << R"({
+    "courses": [
+      {"id": 1, "name": "maths", "colour": "Blue"},
+      {"id": 2, "name": "physics", "colour": "Red"}
+    ],
+    "assignments": [
+      {"id": 1, "course_id": 1, "name": "late maths", "due_date": ")"
+       << OffsetDate(-1)
+       << R"(", "due_time": "09:00", "completed": false},
+      {"id": 2, "course_id": 1, "name": "done maths", "due_date": ")"
+       << OffsetDate(-2)
+       << R"(", "due_time": "10:00", "completed": true},
+      {"id": 3, "course_id": 2, "name": "late physics", "due_date": ")"
+       << OffsetDate(-1)
+       << R"(", "due_time": "11:00", "completed": false}
+    ]
+  })";
+  WriteJson(json.str());
+
+  Manager manager;
+  const auto pending = manager.FilterAssignmentsByCompletion(
+      manager.GetAssignments(), CompletionFilter::Pending);
+  const auto maths = manager.FilterAssignmentsForCourse(pending, "maths");
+  const auto overdue = manager.FilterAssignmentsBeforeDate(maths, "today");
+
+  REQUIRE(overdue.size() == 1);
+  CHECK(overdue.front().GetId() == 1);
+  CHECK(overdue.front().GetName() == "late maths");
 
   std::filesystem::current_path(previous);
   std::filesystem::remove_all(temp_dir);

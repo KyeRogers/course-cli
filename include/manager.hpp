@@ -8,6 +8,8 @@
 #include "colours.hpp"
 #include "course.hpp"
 
+enum class CompletionFilter { All, Pending, Completed };
+
 class Manager {
     public: 
         Manager();
@@ -18,21 +20,29 @@ class Manager {
         void AddCourse(const std::string& name, const CourseColour colour);
         bool SaveData(const std::string& filename) const;
 
-        void ShowAssignments() const;
-        void ShowCourses() const;
-
-        void ShowAssignmentsForDate(const std::string& date,
-                        const bool show_completed = false) const;
-        void ShowAssignmentsForCourse(const std::string& course,
-                          const bool show_completed = false) const;
-        void ShowAssignmentsInRange(const std::string& start_date,
-                        const std::string& end_date,
-                        const bool show_completed = false) const;
-        
         int GetCourseIdByName(const std::string& name) const;
         const Course* GetCourseById(const int id) const;
         const std::vector<Course>& GetCourses() const;
         const std::vector<Assignment>& GetAssignments() const;
+        std::vector<Assignment> FilterAssignmentsByCompletion(
+            const std::vector<Assignment>& source,
+            const CompletionFilter completion) const;
+        std::vector<Assignment> FilterAssignmentsForDate(
+            const std::vector<Assignment>& source,
+            const std::string& date) const;
+        std::vector<Assignment> FilterAssignmentsInRange(
+            const std::vector<Assignment>& source,
+            const std::string& start_date,
+            const std::string& end_date) const;
+        std::vector<Assignment> FilterAssignmentsBeforeDate(
+            const std::vector<Assignment>& source,
+            const std::string& date) const;
+        std::vector<Assignment> FilterAssignmentsAfterDate(
+            const std::vector<Assignment>& source,
+            const std::string& date) const;
+        std::vector<Assignment> FilterAssignmentsForCourse(
+            const std::vector<Assignment>& source,
+            const std::string& course) const;
         Assignment* GetAssignmentById(const int id);
         const Assignment* GetAssignmentById(const int id) const;
 

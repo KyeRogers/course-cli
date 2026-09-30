@@ -32,6 +32,7 @@ endif()
 
 add_executable(course-cli
   src/main.cpp
+  src/ui.cpp
   src/assignment.cpp
   src/course.cpp
   src/manager.cpp

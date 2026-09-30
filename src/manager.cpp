@@ -1,7 +1,6 @@
 #include "../include/manager.hpp"
 
 #include <algorithm>
-#include <ctime>
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -9,25 +8,6 @@
 #include <format>
 
 namespace {
-
-std::string ReadableDate(const std::string& value) {
-  try {
-    int year = std::stoi(value.substr(0, 4));
-    int month = std::stoi(value.substr(5, 2));
-    int day = std::stoi(value.substr(8, 2));
-    std::tm date{};
-    date.tm_year = year - 1900;
-    date.tm_mon = month - 1;
-    date.tm_mday = day;
-    date.tm_hour = 12;
-    std::mktime(&date);
-    char output[64]{};
-    std::strftime(output, sizeof(output), "%A %d %B", &date);
-    return output;
-  } catch (const std::exception&) {
-    return value;
-  }
-}
 
 std::chrono::year_month_day Today() {
   const auto now =
@@ -132,32 +112,6 @@ bool Manager::SaveData(const std::string& filename) const {
   return output_file.good();
 }
 
-// temporary fromat for testing
-void Manager::ShowAssignments() const {
-  std::cout << "### TASK LIST ###\n";
-  for (const Assignment assignment : assignments_) {
-    const Course* temp = GetCourseById(assignment.GetCourseId());
-    if (temp == nullptr) {
-      std::cout << "Course with id: " << assignment.GetCourseId()
-                << " doesnt exist\n";
-    } else {
-      std::cout << Colors::to_ansi(temp->GetColour());
-      std::cout << temp->GetName() << "\t";
-      assignment.print();
-      std::cout << Colors::to_ansi(CourseColour::Default);
-    }
-  }
-  std::cout << "\n###############\n";
-}
-
-void Manager::ShowCourses() const {
-  std::cout << " ### Courses ###\n";
-  for (const Course course : courses_) {
-    course.Print();
-  }
-  std::cout << "\n###############\n";
-}
-
 // return id that matches course name. Return 0 when course doesnt exist
 int Manager::GetCourseIdByName(const std::string& name) const {
   for (const Course& course : courses_) {
@@ -180,6 +134,81 @@ const Course* Manager::GetCourseById(const int id) const {
 
 const std::vector<Assignment>& Manager::GetAssignments() const {
   return assignments_;
+}
+
+std::vector<Assignment> Manager::FilterAssignmentsByCompletion(
+    const std::vector<Assignment>& source,
+    const CompletionFilter completion) const {
+  std::vector<Assignment> filtered;
+  for (const Assignment& assignment : source) {
+    if (completion == CompletionFilter::All ||
+        (completion == CompletionFilter::Pending && !assignment.GetCompleted()) ||
+        (completion == CompletionFilter::Completed && assignment.GetCompleted())) {
+      filtered.push_back(assignment);
+    }
+  }
+  return filtered;
+}
+
+std::vector<Assignment> Manager::FilterAssignmentsForDate(
+    const std::vector<Assignment>& source, const std::string& date) const {
+  const std::string resolved_date = ResolveDate(date);
+  std::vector<Assignment> filtered;
+  for (const Assignment& assignment : source) {
+    if (assignment.GetDueDate() == resolved_date) filtered.push_back(assignment);
+  }
+  return filtered;
+}
+
+std::vector<Assignment> Manager::FilterAssignmentsInRange(
+    const std::vector<Assignment>& source, const std::string& start_date,
+    const std::string& end_date) const {
+  const std::string resolved_start = ResolveDate(start_date);
+  std::string resolved_end = ResolveDate(end_date);
+  if (end_date == "week") {
+    const auto end = std::chrono::sys_days{Today()} + std::chrono::days{7};
+    resolved_end = FormatDate(std::chrono::year_month_day{end});
+  }
+
+  std::vector<Assignment> filtered;
+  for (const Assignment& assignment : source) {
+    if (assignment.GetDueDate() >= resolved_start &&
+        assignment.GetDueDate() <= resolved_end) {
+      filtered.push_back(assignment);
+    }
+  }
+  return filtered;
+}
+
+std::vector<Assignment> Manager::FilterAssignmentsBeforeDate(
+    const std::vector<Assignment>& source, const std::string& date) const {
+  const std::string resolved_date = ResolveDate(date);
+  std::vector<Assignment> filtered;
+  for (const Assignment& assignment : source) {
+    if (assignment.GetDueDate() < resolved_date) filtered.push_back(assignment);
+  }
+  return filtered;
+}
+
+std::vector<Assignment> Manager::FilterAssignmentsAfterDate(
+    const std::vector<Assignment>& source, const std::string& date) const {
+  const std::string resolved_date = ResolveDate(date);
+  std::vector<Assignment> filtered;
+  for (const Assignment& assignment : source) {
+    if (assignment.GetDueDate() > resolved_date) filtered.push_back(assignment);
+  }
+  return filtered;
+}
+
+std::vector<Assignment> Manager::FilterAssignmentsForCourse(
+    const std::vector<Assignment>& source, const std::string& course) const {
+  const int course_id = GetCourseIdByName(course);
+  std::vector<Assignment> filtered;
+  if (course_id == 0) return filtered;
+  for (const Assignment& assignment : source) {
+    if (assignment.GetCourseId() == course_id) filtered.push_back(assignment);
+  }
+  return filtered;
 }
 
 Assignment* Manager::GetAssignmentById(const int id) {
@@ -317,91 +346,6 @@ bool Manager::LoadData(const std::string& filename) {
     last_assignment_id_ = assignments_[assignments_.size() - 1].GetId();
   }
   return true;
-}
-
-void Manager::ShowAssignmentsForDate(const std::string& date,
-                                     const bool show_completed) const {
-  const std::string resolved_date = ResolveDate(date);
-  std::cout << "### TASK LIST FOR " << ReadableDate(resolved_date) << " ###\n";
-  for (const Assignment assignment : assignments_) {
-    if (!show_completed && assignment.GetCompleted()) {
-      continue;
-    }
-    if (assignment.GetDueDate() == resolved_date) {
-      const Course* temp = GetCourseById(assignment.GetCourseId());
-      if (temp == nullptr) {
-        std::cout << "Course with id: " << assignment.GetCourseId()
-                  << " doesnt exist\n";
-      } else {
-        std::cout << Colors::to_ansi(temp->GetColour());
-        std::cout << temp->GetName() << "\t";
-        assignment.print();
-        std::cout << Colors::to_ansi(CourseColour::Default);
-      }
-    }
-  }
-  std::cout << "\n###############\n";
-}
-
-void Manager::ShowAssignmentsForCourse(const std::string& course,
-                                       const bool show_completed) const {
-  std::cout << "### TASK LIST FOR COURSE: " << course << " ###\n";
-  int course_id = GetCourseIdByName(course);
-  if (course_id == 0) {
-    std::cerr << course << " doesnt exist\n";
-    return;
-  }
-  for (const Assignment assignment : assignments_) {
-    if (!show_completed && assignment.GetCompleted()) {
-      continue;
-    }
-    if (assignment.GetCourseId() == course_id) {
-      const Course* temp = GetCourseById(assignment.GetCourseId());
-      if (temp == nullptr) {
-        std::cout << "Course with id: " << assignment.GetCourseId()
-                  << " doesnt exist\n";
-      } else {
-        std::cout << Colors::to_ansi(temp->GetColour());
-        std::cout << temp->GetName() << "\t";
-        assignment.print();
-        std::cout << Colors::to_ansi(CourseColour::Default);
-      }
-    }
-  }
-  std::cout << "\n###############\n";
-}
-
-void Manager::ShowAssignmentsInRange(const std::string& start_date,
-                                     const std::string& end_date,
-                                     const bool show_completed) const {
-  const std::string resolved_start = ResolveDate(start_date);
-  std::string resolved_end = ResolveDate(end_date);
-  if (end_date == "week") {
-    const auto week_end = std::chrono::sys_days{Today()} + std::chrono::days{7};
-    resolved_end = FormatDate(std::chrono::year_month_day{week_end});
-  }
-
-  std::cout << "### TASK LIST FOR RANGE: " << ReadableDate(resolved_start)
-            << " to " << ReadableDate(resolved_end) << " ###\n";
-  for (const Assignment assignment : assignments_) {
-    if (!show_completed && assignment.GetCompleted()) {
-      continue;
-    }
-    if (assignment.GetDueDate() >= resolved_start &&
-        assignment.GetDueDate() <= resolved_end) {
-      const Course* temp = GetCourseById(assignment.GetCourseId());
-      if (temp == nullptr) {
-        std::cout << "Course with id: " << assignment.GetCourseId()
-                  << " doesnt exist\n";
-      } else {
-        std::cout << Colors::to_ansi(temp->GetColour());
-        std::cout << temp->GetName() << "\t";
-        assignment.print();
-        std::cout << Colors::to_ansi(CourseColour::Default);
-      }
-    }
-  }
-  std::cout << "\n###############\n";
 }
 
 const std::vector<Course>& Manager::GetCourses() const {

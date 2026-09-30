@@ -73,7 +73,7 @@
       "priority": "low"
     },
     {
-      "completed": true,
+      "completed": false,
       "course_id": 1,
       "due_date": "2026-10-02",
       "due_time": "15:00",
@@ -89,15 +89,6 @@
       "id": 10,
       "name": "Binary tree challenge",
       "priority": "high"
-    },
-    {
-      "completed": true,
-      "course_id": 3,
-      "due_date": "2026-09-12",
-      "due_time": "12:00",
-      "id": 11,
-      "name": "Completed mechanics worksheet",
-      "priority": "normal"
     },
     {
       "completed": false,
@@ -125,6 +116,15 @@
       "id": 14,
       "name": "Study exam",
       "priority": "low"
+    },
+    {
+      "completed": false,
+      "course_id": 4,
+      "due_date": "2026-09-22",
+      "due_time": "",
+      "id": 15,
+      "name": "ffhgf",
+      "priority": "high"
     }
   ],
   "courses": [
