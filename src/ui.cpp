@@ -362,15 +362,39 @@ void RunAddCourse(Manager& manager) {
 void RunHelp() {
   auto screen = ScreenInteractive::TerminalOutput();
   auto page = Renderer([&] {
-    return vbox({text("COURSE MANAGER") | bold | color(Color::Cyan) | center,
-                 text("Keyboard guide") | dim | center, separator(),
-                 text("Dashboard   Left/Right sections, Up/Down tasks, Enter toggles"),
-                 text("Tasks       Left/Right status, Up/Down tasks, a add, e edit"),
-                 text("Courses     Enter opens, q returns, d deletes"),
-                 text("Calendar    Left/Right day, Up/Down tasks, a add, e edit"),
-                 separator(),
-                 text("Space confirms a choice     ? help     q / Esc back") | dim}) |
-           border;
+    return vbox({
+      text("COURSE MANAGER") | bold | color(Color::Cyan) | center,
+      text("Keyboard guide") | dim | center,
+      separator(),
+      vbox({
+        text("Navigation") | bold,
+        text("  Up / Down         Move through items"),
+        text("  Left / Right     Change section or day"),
+        text("  Enter            Toggle / open selected item"),
+        text("  q / Esc          Go back"),
+        text("  ?                Open this help page"),
+      }),
+      separator(),
+      vbox({
+        text("Task actions") | bold,
+        text("  a                Add a task"),
+        text("  e                Edit selected task"),
+        text("  d                Delete selected task"),
+        text("  s                Change sort mode"),
+        text("  /                Search task names or courses"),
+        text("  c                Cleanup completed tasks"),
+      }),
+      separator(),
+      vbox({
+        text("Course and calendar") | bold,
+        text("  Enter            Open course details"),
+        text("  a                Add course from the courses screen"),
+        text("  d                Delete selected course"),
+        text("  Space           Confirm menu choice"),
+      }),
+      separator(),
+      text("Tip: use the same task form to edit dates, priorities, and course assignment") | dim,
+    }) | border | size(WIDTH, LESS_THAN, 110);
   });
   auto app = CatchEvent(page, [&](const Event& event) {
     if (event == Event::Character('q') || event == Event::Escape) {
@@ -458,24 +482,38 @@ void RunTasks(Manager& manager) {
   auto screen = ScreenInteractive::TerminalOutput();
   bool completed_view = false;
   int selected = 0;
+  int sort_mode = 0;
+  std::string search_query;
   std::vector<int> ids;
   auto renderer = Renderer([&] {
     ids.clear();
     Elements rows;
-    const auto tasks = manager.FilterAssignmentsByCompletion(
+    auto tasks = manager.FilterAssignmentsByCompletion(
         manager.GetAssignments(), completed_view ? CompletionFilter::Completed
                                                  : CompletionFilter::Pending);
+    if (!search_query.empty()) {
+      tasks = manager.SearchAssignments(tasks, search_query);
+    }
+    switch (sort_mode) {
+      case 0: tasks = manager.SortAssignments(tasks, AssignmentSort::DueDate); break;
+      case 1: tasks = manager.SortAssignments(tasks, AssignmentSort::Priority); break;
+      case 2: tasks = manager.SortAssignments(tasks, AssignmentSort::Course); break;
+      default: tasks = manager.SortAssignments(tasks, AssignmentSort::Name); break;
+    }
     for (const Assignment& task : tasks) {
       ids.push_back(task.GetId());
       rows.push_back(TaskRow(task, manager.GetCourseById(task.GetCourseId()),
                              rows.size() == static_cast<std::size_t>(selected)));
     }
     if (selected >= static_cast<int>(ids.size())) selected = ids.empty() ? 0 : ids.size() - 1;
+    const std::array<std::string, 4> labels{"Due", "Priority", "Course", "Name"};
     return vbox({text("Tasks") | bold, separator(),
-                 text((completed_view ? "Completed" : "Pending") +
-                      std::string("  [Left/Right to switch]")) | bold,
+                 hbox({text((completed_view ? "Completed" : "Pending") +
+                            std::string("  [Left/Right to switch]")) | bold,
+                       text("   Sort: " + labels[sort_mode]) | dim}),
+                 search_query.empty() ? text("Search: off") : text("Search: " + search_query) | dim,
                  rows.empty() ? text("No tasks") : vbox(rows), separator(),
-                 text("Up/Down select  Enter toggle  a add  e edit  c cleanup  ? help  q back") | dim}) |
+                 text("Up/Down select  Enter toggle  a add  e edit  d delete  / search  s sort  c cleanup  ? help  q back") | dim}) |
            border;
   });
   auto app = CatchEvent(renderer, [&](const Event& event) {
@@ -486,7 +524,27 @@ void RunTasks(Manager& manager) {
     if (event == Event::ArrowDown) { if (selected + 1 < static_cast<int>(ids.size())) ++selected; return true; }
     if (event == Event::Character('a')) { RunTaskForm(manager); selected = 0; return true; }
     if (event == Event::Character('e') && !ids.empty()) { RunTaskForm(manager, {}, ids[selected]); return true; }
+    if (event == Event::Character('d') && !ids.empty()) { manager.DeleteAssignmentById(ids[selected]); selected = 0; return true; }
+    if (event == Event::Character('s')) { sort_mode = (sort_mode + 1) % 4; selected = 0; return true; }
     if (event == Event::Character('c')) { RunCleanup(manager); return true; }
+    if (event == Event::Character('/')) {
+      std::string input = search_query;
+      std::string message = "/";
+      if (input.empty()) {
+        message = "Search query:";
+      }
+      auto query_box = Input(&search_query, message);
+      auto dialog = Renderer(query_box, [&] { return vbox({text("Search tasks") | bold, query_box->Render(), text("Enter applies  Esc cancels") | dim}) | border; });
+      auto search_screen = ScreenInteractive::TerminalOutput();
+      auto search_app = CatchEvent(dialog, [&](const Event& search_event) {
+        if (search_event == Event::Return) { search_screen.Exit(); return true; }
+        if (search_event == Event::Escape) { search_query = input; search_screen.Exit(); return true; }
+        return false;
+      });
+      search_screen.Loop(search_app);
+      selected = 0;
+      return true;
+    }
     if (event == Event::Return && !ids.empty()) { manager.CompleteAssignmentById(ids[selected]); return true; }
     return false;
   });

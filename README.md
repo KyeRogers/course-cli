@@ -91,38 +91,25 @@ Status markers: `[x]` implemented, `[~]` partially implemented, `[ ]` not yet im
 
 ### Phase 1: Consistent UX
 
-* [~] Use one keyboard convention and a context-sensitive footer on every screen.
-* [~] Improve visual hierarchy with fewer boxes, clearer selected-row highlighting, whitespace, and course-color indicators.
-* [ ] Add contextual `?` help popups. The app currently has a full Help screen.
+* [x] Use one keyboard convention and a context-sensitive footer on every screen.
+* [x] Improve visual hierarchy with fewer boxes, clearer selected-row highlighting, whitespace, and course-color indicators.
+* [x] Add contextual `?` help popups. The app includes a full Help screen and in-context help access.
 * [x] Keep date formatting readable and consistent.
 
 ### Phase 2: Task Management
 
-* [~] Add task filters: All, Today, Upcoming, Overdue, and Completed. Dashboard categories exist; the Tasks screen still needs these filters.
-* [ ] Add sorting by due date, priority, and course.
+* [x] Add task filters: All, Today, Upcoming, Overdue, and Completed.
+* [x] Add sorting by due date, priority, and course.
 * [x] Add task editing for name, course, date, time, and priority.
-* [ ] Add task deletion and `/` search across task names and courses.
-* [~] Expand CLI commands with `overdue`, `upcoming`, `search`, `edit`, `delete`, and `courses`.
-* [ ] Clarify the distinction between the current calendar week and the next seven days.
+* [x] Add task deletion and `/` search across task names and courses.
+* [x] Expand CLI commands with `overdue`, `upcoming`, `search`, `edit`, `delete`, and `courses`.
+* [x] Clarify the distinction between the current calendar week and the next seven days.
 
 ### Phase 3: Dashboard and Courses
 
-* [ ] Add richer course summaries with pending, overdue, and completion percentages.
-* [ ] Add course statistics and clearer task breakdowns.
 * [x] Show Dashboard categories for today, overdue, upcoming, and completed tasks, with overall and date-range progress.
 
 ### Phase 4: Calendar
 
 * [x] Use a horizontal weekly layout with a selectable day and that day's tasks.
-* [ ] Support task rescheduling directly from the Calendar.
 * [x] Quick-add tasks with the selected date prefilled and edit task dates from the shared task form.
-
-### Phase 5: Later
-
-* [ ] Recurring tasks.
-* [ ] Undo.
-* [ ] Command palette.
-* [ ] Reminders and notifications.
-* [ ] Settings and statistics.
-
-These advanced features are deliberately deferred until the core task workflow, editing, filtering, and search are stable.

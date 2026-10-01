@@ -1,6 +1,7 @@
 #include "../include/manager.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -61,9 +62,28 @@ Manager::Manager()
   }
 }
 
+void Manager::CaptureState() {
+  undo_stack_.push_back({assignments_, courses_, last_assignment_id_, last_course_id_});
+}
+
+bool Manager::UndoLastAction() {
+  if (undo_stack_.empty()) {
+    return false;
+  }
+
+  const Snapshot snapshot = undo_stack_.back();
+  undo_stack_.pop_back();
+  assignments_ = snapshot.assignments;
+  courses_ = snapshot.courses;
+  last_assignment_id_ = snapshot.last_assignment_id;
+  last_course_id_ = snapshot.last_course_id;
+  return true;
+}
+
 bool Manager::AddTask(const std::string& name, const std::string& course,
                       std::string& due_date, const std::string& due_time,
-                      const AssignmentPriority priority) {
+                      const AssignmentPriority priority,
+                      const Recurrence recurrence) {
   int course_id = GetCourseIdByName(course);
   if (course_id == 0) {
     std::cerr << name << " doesnt exist\n";
@@ -76,9 +96,10 @@ bool Manager::AddTask(const std::string& name, const std::string& course,
       due_date = FormatDate(std::chrono::year_month_day{tomorrow});
     }
 
+    CaptureState();
     Assignment new_assignment(last_assignment_id_ + 1, course_id, name,
                               due_date, due_time);
-    new_assignment.SetDetails(name, course_id, due_date, due_time, priority);
+    new_assignment.SetDetails(name, course_id, due_date, due_time, priority, recurrence);
     assignments_.push_back(new_assignment);
     last_assignment_id_++;
     return true;
@@ -226,6 +247,62 @@ std::vector<Assignment> Manager::FilterAssignmentsForCourse(
   return filtered;
 }
 
+std::vector<Assignment> Manager::SearchAssignments(
+    const std::vector<Assignment>& source, const std::string& query) const {
+  if (query.empty()) return source;
+  std::string needle = query;
+  std::transform(needle.begin(), needle.end(), needle.begin(), [](unsigned char ch) {
+    return static_cast<char>(std::tolower(ch));
+  });
+
+  std::vector<Assignment> matches;
+  for (const Assignment& assignment : source) {
+    const Course* course = GetCourseById(assignment.GetCourseId());
+    std::string task_name = assignment.GetName();
+    std::string course_name = course == nullptr ? "" : course->GetName();
+    std::transform(task_name.begin(), task_name.end(), task_name.begin(),
+                   [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+    std::transform(course_name.begin(), course_name.end(), course_name.begin(),
+                   [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+    if (task_name.find(needle) != std::string::npos ||
+        course_name.find(needle) != std::string::npos) {
+      matches.push_back(assignment);
+    }
+  }
+  return matches;
+}
+
+std::vector<Assignment> Manager::SortAssignments(
+    const std::vector<Assignment>& source,
+    const AssignmentSort sort) const {
+  std::vector<Assignment> sorted = source;
+  std::sort(sorted.begin(), sorted.end(), [&](const Assignment& left,
+                                             const Assignment& right) {
+    switch (sort) {
+      case AssignmentSort::DueDate:
+        return left.GetDueDate() < right.GetDueDate();
+      case AssignmentSort::Priority: {
+        const auto left_pri = static_cast<int>(left.GetPriority());
+        const auto right_pri = static_cast<int>(right.GetPriority());
+        if (left_pri != right_pri) return left_pri > right_pri;
+        return left.GetDueDate() < right.GetDueDate();
+      }
+      case AssignmentSort::Course: {
+        const Course* left_course = GetCourseById(left.GetCourseId());
+        const Course* right_course = GetCourseById(right.GetCourseId());
+        const std::string left_name = left_course == nullptr ? "" : left_course->GetName();
+        const std::string right_name = right_course == nullptr ? "" : right_course->GetName();
+        if (left_name != right_name) return left_name < right_name;
+        return left.GetDueDate() < right.GetDueDate();
+      }
+      case AssignmentSort::Name:
+      default:
+        return left.GetName() < right.GetName();
+    }
+  });
+  return sorted;
+}
+
 CalendarWeek Manager::GetCalendarWeek(
     const std::vector<Assignment>& source, const std::string& date) const {
   const auto selected_day = std::chrono::sys_days{ParseDate(date)};
@@ -281,6 +358,18 @@ const Assignment* Manager::GetAssignmentById(const int id) const {
   return nullptr;
 }
 
+bool Manager::DeleteAssignmentById(const int id) {
+  const auto assignment = std::remove_if(assignments_.begin(), assignments_.end(),
+                                         [id](const Assignment& task) {
+                                           return task.GetId() == id;
+                                         });
+  if (assignment == assignments_.end()) {
+    return false;
+  }
+  assignments_.erase(assignment, assignments_.end());
+  return true;
+}
+
 bool Manager::CompleteAssignmentById(const int id) {
   Assignment* assignment = GetAssignmentById(id);
   if (assignment == nullptr) {
@@ -296,14 +385,16 @@ bool Manager::UpdateAssignment(const int id, const std::string& name,
                                const std::string& course,
                                const std::string& due_date,
                                const std::string& due_time,
-                               const AssignmentPriority priority) {
+                               const AssignmentPriority priority,
+                               const Recurrence recurrence) {
   Assignment* assignment = GetAssignmentById(id);
   const int course_id = GetCourseIdByName(course);
   if (assignment == nullptr || course_id == 0 || name.empty() || due_date.empty()) {
     return false;
   }
 
-  assignment->SetDetails(name, course_id, due_date, due_time, priority);
+  CaptureState();
+  assignment->SetDetails(name, course_id, due_date, due_time, priority, recurrence);
   return true;
 }
 

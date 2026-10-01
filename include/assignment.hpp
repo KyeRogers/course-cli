@@ -5,6 +5,7 @@
 #include <chrono>
 
 enum class AssignmentPriority { Low, Normal, High };
+enum class Recurrence { None, Daily, Weekly, Monthly };
 
 class Assignment {
  public:
@@ -26,9 +27,13 @@ class Assignment {
   const std::string& GetDueTime() const;
   const bool GetCompleted() const;
   AssignmentPriority GetPriority() const;
+  Recurrence GetRecurrence() const;
   void SetDetails(const std::string& name, const int course_id,
                   const std::string& due_date, const std::string& due_time,
-                  const AssignmentPriority priority);
+                  const AssignmentPriority priority,
+                  const Recurrence recurrence = Recurrence::None);
+  void SetRecurrence(const Recurrence recurrence);
+  std::string GetRecurrenceLabel() const;
 
   std::chrono::year_month_day GetDateKey() const;
   bool IsDueToday() const;
@@ -45,6 +50,7 @@ class Assignment {
   std::string due_time_;  // optional, can be empty if not provided
   bool completed_;
   AssignmentPriority priority_;
+  Recurrence recurrence_;
 };
 
 #endif

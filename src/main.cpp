@@ -9,22 +9,27 @@
 namespace {
 
 void PrintUsage() {
-  std::cout << "Usage:\n"
-            << "  course-cli                  Run the interactive menu\n"
-            << "  course-cli today [-a]       Show today's tasks\n"
-            << "  course-cli tomorrow [-a]    Show tomorrow's tasks\n"
-            << "  course-cli week [-a]        Show the current calendar week\n"
-            << "  course-cli upcoming [-a]    Show the next seven days\n"
-            << "  course-cli overdue [-a]     Show overdue tasks\n"
-            << "  course-cli course NAME [-a] Show a course's tasks\n"
+  std::cout << "\nCourseCLI\n"
+            << "========\n"
+            << "Interactive:\n"
+            << "  course-cli                              Start the TUI menu\n"
+            << "\nListing filters:\n"
+            << "  course-cli today [-a]                   Show today's tasks\n"
+            << "  course-cli tomorrow [-a]                Show tomorrow's tasks\n"
+            << "  course-cli week [-a]                    Show the current calendar week\n"
+            << "  course-cli upcoming [-a]                Show the next seven days\n"
+            << "  course-cli overdue [-a]                 Show overdue tasks\n"
+            << "  course-cli course NAME [-a]             Show a course's tasks\n"
+            << "\nTask and course actions:\n"
             << "  course-cli add_task NAME COURSE DATE [TIME]\n"
             << "  course-cli add_course NAME COLOUR\n"
-            << "  course-cli done ID          Toggle task completion\n"
-            << "  course-cli -h               Show this help\n"
-            << "\nListings show pending tasks by default; -a includes "
-               "completed tasks.\n"
-            << "Stack listing selectors in any order, for example:\n"
-            << "  course-cli today course Programming -a\n";
+            << "  course-cli done ID                      Toggle completion\n"
+            << "  course-cli -h, --help, help             Show this help\n"
+            << "\nNotes:\n"
+            << "  - listings show pending tasks by default\n"
+            << "  - add -a to include completed tasks\n"
+            << "  - selectors can be stacked, for example:\n"
+            << "      course-cli today course Programming -a\n\n";
 }
 
 void PrintAssignments(const Manager& manager,

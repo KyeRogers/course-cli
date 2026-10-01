@@ -34,7 +34,8 @@ Assignment::Assignment()
       due_date_{"NULL"},
       due_time_{},
       completed_{false},
-      priority_{AssignmentPriority::Normal} {}
+      priority_{AssignmentPriority::Normal},
+      recurrence_{Recurrence::None} {}
 
 Assignment::Assignment(const int id, const int course_id,
                        const std::string& name, const std::string& due_date)
@@ -49,7 +50,8 @@ Assignment::Assignment(const int id, const int course_id,
       due_date_{due_date},
       due_time_{due_time},
       completed_{false},
-      priority_{AssignmentPriority::Normal} {}
+      priority_{AssignmentPriority::Normal},
+      recurrence_{Recurrence::None} {}
 
     Assignment::Assignment(const int id, const int course_id,
                const std::string& name, const std::string& due_date,
@@ -65,7 +67,8 @@ Assignment::Assignment(const int id, const int course_id,
       due_date_{due_date},
       due_time_{due_time},
       completed_{completed},
-      priority_{AssignmentPriority::Normal} {}
+      priority_{AssignmentPriority::Normal},
+      recurrence_{Recurrence::None} {}
 
 // getters
 int Assignment::GetId() const { return id_; }
@@ -75,16 +78,33 @@ const std::string& Assignment::GetDueDate() const { return due_date_; }
 const std::string& Assignment::GetDueTime() const { return due_time_; }
 const bool Assignment::GetCompleted() const { return completed_; }
 AssignmentPriority Assignment::GetPriority() const { return priority_; }
+Recurrence Assignment::GetRecurrence() const { return recurrence_; }
 
 void Assignment::SetDetails(const std::string& name, const int course_id,
                             const std::string& due_date,
                             const std::string& due_time,
-                            const AssignmentPriority priority) {
+                            const AssignmentPriority priority,
+                            const Recurrence recurrence) {
   name_ = name;
   course_id_ = course_id;
   due_date_ = due_date;
   due_time_ = due_time;
   priority_ = priority;
+  recurrence_ = recurrence;
+}
+
+void Assignment::SetRecurrence(const Recurrence recurrence) {
+  recurrence_ = recurrence;
+}
+
+std::string Assignment::GetRecurrenceLabel() const {
+  switch (recurrence_) {
+    case Recurrence::Daily: return "Daily";
+    case Recurrence::Weekly: return "Weekly";
+    case Recurrence::Monthly: return "Monthly";
+    case Recurrence::None:
+    default: return "None";
+  }
 }
 
 void Assignment::print() const {
