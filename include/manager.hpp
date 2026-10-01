@@ -1,6 +1,7 @@
 #ifndef MANAGER_HPP
 #define MANAGER_HPP
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -9,6 +10,19 @@
 #include "course.hpp"
 
 enum class CompletionFilter { All, Pending, Completed };
+
+struct CalendarDay {
+    std::string date;
+    std::vector<Assignment> assignments;
+};
+
+struct CalendarWeek {
+    std::string monday;
+    std::string sunday;
+    std::string previous_monday;
+    std::string next_monday;
+    std::array<CalendarDay, 7> days;
+};
 
 class Manager {
     public: 
@@ -43,6 +57,9 @@ class Manager {
         std::vector<Assignment> FilterAssignmentsForCourse(
             const std::vector<Assignment>& source,
             const std::string& course) const;
+        CalendarWeek GetCalendarWeek(
+            const std::vector<Assignment>& source,
+            const std::string& date) const;
         Assignment* GetAssignmentById(const int id);
         const Assignment* GetAssignmentById(const int id) const;
 

@@ -13,7 +13,8 @@ void PrintUsage() {
             << "  course-cli                  Run the interactive menu\n"
             << "  course-cli today [-a]       Show today's tasks\n"
             << "  course-cli tomorrow [-a]    Show tomorrow's tasks\n"
-            << "  course-cli week [-a]        Show the next seven days\n"
+            << "  course-cli week [-a]        Show the current calendar week\n"
+            << "  course-cli upcoming [-a]    Show the next seven days\n"
             << "  course-cli overdue [-a]     Show overdue tasks\n"
             << "  course-cli course NAME [-a] Show a course's tasks\n"
             << "  course-cli add_task NAME COURSE DATE [TIME]\n"
@@ -43,11 +44,6 @@ void PrintAssignments(const Manager& manager,
   }
 }
 
-bool IsListingSelector(const std::string& value) {
-  return value == "today" || value == "tomorrow" || value == "week" ||
-         value == "course";
-}
-
 int RunListings(Manager& manager, const int argc, const char* argv[]) {
   std::vector<Assignment> assignments = manager.GetAssignments();
   bool has_selector = false;
@@ -60,21 +56,26 @@ int RunListings(Manager& manager, const int argc, const char* argv[]) {
     } else if (option == "today" || option == "tomorrow") {
       assignments = manager.FilterAssignmentsForDate(assignments, option);
       has_selector = true;
-    } else if (option == "overdue" ) {
+    } else if (option == "upcoming") {
       assignments =
           manager.FilterAssignmentsInRange(assignments, "today", "week");
       has_selector = true;
     } else if (option == "course") {
-      if (index + 1 >= argc || IsListingSelector(argv[index + 1]) ||
-          std::string{argv[index + 1]} == "-a") {
+      if (index + 1 >= argc || std::string{argv[index + 1]} == "-a") {
         return -1;
       }
       assignments =
           manager.FilterAssignmentsForCourse(assignments, argv[++index]);
       has_selector = true;
     } else if (option == "overdue") {
-        assignments = manager.FilterAssignmentsBeforeDate(assignments, "today");
-        has_selector = true;
+      assignments = manager.FilterAssignmentsBeforeDate(assignments, "today");
+      has_selector = true;
+    } else if (option == "week") {
+      const CalendarWeek week =
+        manager.GetCalendarWeek(manager.GetAssignments(), "today");
+      assignments = manager.FilterAssignmentsInRange(
+        assignments, week.monday, week.sunday);
+      has_selector = true;
     } else {
       return -1;
     }

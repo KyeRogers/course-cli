@@ -64,7 +64,8 @@ Assignments contain a name, course, due date, optional due time, completion stat
 * `src/main.cpp` handles CLI arguments, command dispatch, and application startup.
 * `include/ui.hpp` exposes the interactive UI entry point.
 * `src/ui.cpp` owns screen rendering, keyboard interaction, formatting, and shared UI components such as task rows and the add/edit form.
-* `src/manager.cpp` and `src/assignment.cpp` contain task/course behavior and persistence, independent of FTXUI presentation.
+* `src/manager.cpp` owns task queries and mutations, persistence, and composable vector-in/vector-out filters, including the Monday–Sunday calendar week for any supplied date.
+* `src/assignment.cpp` and `src/course.cpp` own model data and behavior, independent of FTXUI presentation.
 
 ## Build and Test
 
@@ -101,7 +102,7 @@ Status markers: `[x]` implemented, `[~]` partially implemented, `[ ]` not yet im
 * [ ] Add sorting by due date, priority, and course.
 * [x] Add task editing for name, course, date, time, and priority.
 * [ ] Add task deletion and `/` search across task names and courses.
-* [ ] Expand CLI commands with `overdue`, `upcoming`, `search`, `edit`, `delete`, and `courses`.
+* [~] Expand CLI commands with `overdue`, `upcoming`, `search`, `edit`, `delete`, and `courses`.
 * [ ] Clarify the distinction between the current calendar week and the next seven days.
 
 ### Phase 3: Dashboard and Courses

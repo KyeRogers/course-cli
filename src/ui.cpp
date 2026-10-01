@@ -59,18 +59,6 @@ DateValue Today() {
   return {local->tm_year + 1900, local->tm_mon + 1, local->tm_mday};
 }
 
-DateValue DateFromTodayOffset(const int offset) {
-  const DateValue today = Today();
-  std::tm value{};
-  value.tm_year = today.year - 1900;
-  value.tm_mon = today.month - 1;
-  value.tm_mday = today.day + offset;
-  value.tm_hour = 12;
-  const std::time_t timestamp = std::mktime(&value);
-  const std::tm* result = std::localtime(&timestamp);
-  return {result->tm_year + 1900, result->tm_mon + 1, result->tm_mday};
-}
-
 std::string IsoDate(const DateValue& date) {
   std::ostringstream output;
   output << std::setfill('0') << std::setw(4) << date.year << '-'
@@ -584,82 +572,102 @@ void RunCourses(Manager& manager) {
 
 void RunCalendar(Manager& manager) {
   auto screen = ScreenInteractive::TerminalOutput();
-  int week_offset = 0;
-  int day = 0;
+  std::string selected_date = IsoDate(Today());
+  std::size_t day = 0;
   int task = -1;
-  std::array<std::vector<int>, 7> ids_by_day;
-  auto week_start_offset = [&] {
-    const DateValue today = Today();
-    std::tm value{};
-    value.tm_year = today.year - 1900;
-    value.tm_mon = today.month - 1;
-    value.tm_mday = today.day;
-    value.tm_hour = 12;
-    std::mktime(&value);
-    return week_offset * 7 - (value.tm_wday + 6) % 7;
-  };
+  CalendarWeek displayed_week;
   auto renderer = Renderer([&] {
-    const int first_day = week_start_offset();
-    Elements columns;
-    for (auto& ids : ids_by_day) ids.clear();
     const auto pending = manager.FilterAssignmentsByCompletion(
         manager.GetAssignments(), CompletionFilter::Pending);
-    for (int offset = 0; offset < 7; ++offset) {
-      const DateValue date = DateFromTodayOffset(first_day + offset);
-      const std::string iso = IsoDate(date);
-      const auto due_that_day = manager.FilterAssignmentsForDate(pending, iso);
-      for (const Assignment& assignment : due_that_day) {
-        ids_by_day[offset].push_back(assignment.GetId());
+    displayed_week = manager.GetCalendarWeek(pending, selected_date);
+    for (std::size_t index = 0; index < displayed_week.days.size(); ++index) {
+      if (displayed_week.days[index].date == selected_date) {
+        day = index;
+        break;
       }
-      columns.push_back(vbox({text((offset == day ? "> " : "  ") + Weekday(date)) | bold,
-                              text(ShortDate(date)),
-                              text(std::to_string(ids_by_day[offset].size()) + " tasks") | dim}) |
-                        (offset == day ? inverted : nothing) | flex);
+    }
+
+    Elements columns;
+    for (std::size_t offset = 0; offset < displayed_week.days.size(); ++offset) {
+      const CalendarDay& calendar_day = displayed_week.days[offset];
+      const DateValue date{std::stoi(calendar_day.date.substr(0, 4)),
+                           std::stoi(calendar_day.date.substr(5, 2)),
+                           std::stoi(calendar_day.date.substr(8, 2))};
+      columns.push_back(
+          vbox({text((offset == day ? "> " : "  ") + Weekday(date)) | bold,
+                text(ShortDate(date)),
+                text(std::to_string(calendar_day.assignments.size()) + " tasks") |
+                    dim}) |
+          (offset == day ? inverted : nothing) | flex);
+    }
+
+    const auto& selected_tasks = displayed_week.days[day].assignments;
+    if (task >= static_cast<int>(selected_tasks.size())) {
+      task = selected_tasks.empty() ? -1 : static_cast<int>(selected_tasks.size()) - 1;
     }
     Elements rows;
-    for (std::size_t index = 0; index < ids_by_day[day].size(); ++index) {
-      const Assignment* assignment = manager.GetAssignmentById(ids_by_day[day][index]);
-      if (assignment == nullptr) continue;
-      rows.push_back(TaskRow(*assignment, manager.GetCourseById(assignment->GetCourseId()),
+    for (std::size_t index = 0; index < selected_tasks.size(); ++index) {
+      const Assignment& assignment = selected_tasks[index];
+      rows.push_back(TaskRow(assignment,
+                             manager.GetCourseById(assignment.GetCourseId()),
                              static_cast<int>(index) == task));
     }
-    return vbox({text("Weekly calendar") | bold, separator(), hbox(columns) | border,
-                 separator(), text("Selected day: " + ReadableDate(IsoDate(DateFromTodayOffset(first_day + day)))) | bold,
+
+    return vbox({text("Weekly calendar") | bold, separator(),
+                 text(ReadableDate(displayed_week.monday) + " to " +
+                      ReadableDate(displayed_week.sunday)) | dim,
+                 hbox(columns) | border, separator(),
+                 text("Selected day: " + ReadableDate(selected_date)) | bold,
                  rows.empty() ? text("No tasks") : vbox(rows), separator(),
-                 text("Left/Right day  Up/Down task  a add  e edit  Enter toggle  ? help  q back") | dim}) |
+                 text("Left/Right day  Up/Down task  a add  e edit  Enter toggle  ? help  q back") |
+                     dim}) |
            border;
   });
   auto app = CatchEvent(renderer, [&](const Event& event) {
     if (event == Event::Character('?')) { RunHelp(); return true; }
     if (event == Event::Character('q') || event == Event::Escape) { screen.Exit(); return true; }
     if (event == Event::ArrowLeft) {
-      if (day > 0) --day;
-      else if (week_offset > 0) { --week_offset; day = 6; }
+      if (day > 0) {
+        selected_date = displayed_week.days[day - 1].date;
+      } else {
+        const CalendarWeek previous = manager.GetCalendarWeek(
+            manager.GetAssignments(), displayed_week.previous_monday);
+        if (previous.monday >=
+            manager.GetCalendarWeek(manager.GetAssignments(), IsoDate(Today())).monday) {
+          selected_date = previous.days.back().date;
+        }
+      }
       task = -1;
       return true;
     }
     if (event == Event::ArrowRight) {
-      if (day < 6) ++day;
-      else { ++week_offset; day = 0; }
+      if (day + 1 < displayed_week.days.size()) {
+        selected_date = displayed_week.days[day + 1].date;
+      } else {
+        selected_date = displayed_week.next_monday;
+      }
       task = -1;
       return true;
     }
     if (event == Event::ArrowUp) { if (task > 0) --task; else if (task == 0) task = -1; return true; }
     if (event == Event::ArrowDown) {
-      if (task < static_cast<int>(ids_by_day[day].size()) - 1) ++task;
+      if (task < static_cast<int>(displayed_week.days[day].assignments.size()) - 1) ++task;
       return true;
     }
     if (event == Event::Character('a')) {
-      RunTaskForm(manager, IsoDate(DateFromTodayOffset(week_start_offset() + day)));
+      RunTaskForm(manager, selected_date);
       task = -1;
       return true;
     }
-    if (event == Event::Character('e') && task >= 0 && task < static_cast<int>(ids_by_day[day].size())) {
-      RunTaskForm(manager, {}, ids_by_day[day][task]);
+    if (event == Event::Character('e') && task >= 0 &&
+        task < static_cast<int>(displayed_week.days[day].assignments.size())) {
+      RunTaskForm(manager, {}, displayed_week.days[day].assignments[task].GetId());
       return true;
     }
-    if (event == Event::Return && task >= 0 && task < static_cast<int>(ids_by_day[day].size())) {
-      manager.CompleteAssignmentById(ids_by_day[day][task]);
+    if (event == Event::Return && task >= 0 &&
+        task < static_cast<int>(displayed_week.days[day].assignments.size())) {
+      manager.CompleteAssignmentById(
+          displayed_week.days[day].assignments[task].GetId());
       task = -1;
       return true;
     }

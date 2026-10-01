@@ -260,3 +260,36 @@ TEST_CASE("assignment filters can be composed over a supplied vector") {
   std::filesystem::current_path(previous);
   std::filesystem::remove_all(temp_dir);
 }
+
+TEST_CASE("calendar week is calculated from the supplied weekday") {
+  const auto previous = std::filesystem::current_path();
+  const auto temp_dir = std::filesystem::temp_directory_path() /
+                        std::filesystem::path("coursecli-manager-calendar-week");
+
+  std::filesystem::remove_all(temp_dir);
+  std::filesystem::create_directories(temp_dir / "data");
+  std::filesystem::current_path(temp_dir);
+  WriteJson(R"({
+    "courses": [{"id": 1, "name": "maths", "colour": "Blue"}],
+    "assignments": [
+      {"id": 1, "course_id": 1, "name": "Monday", "due_date": "2026-09-28", "due_time": "", "completed": false},
+      {"id": 2, "course_id": 1, "name": "Wednesday", "due_date": "2026-09-30", "due_time": "", "completed": false},
+      {"id": 3, "course_id": 1, "name": "Sunday", "due_date": "2026-10-04", "due_time": "", "completed": false},
+      {"id": 4, "course_id": 1, "name": "Next Monday", "due_date": "2026-10-05", "due_time": "", "completed": false}
+    ]
+  })");
+
+  Manager manager;
+  const CalendarWeek week =
+      manager.GetCalendarWeek(manager.GetAssignments(), "2026-09-30");
+
+  CHECK(week.monday == "2026-09-28");
+  CHECK(week.sunday == "2026-10-04");
+  CHECK(week.days[0].assignments.size() == 1);
+  CHECK(week.days[2].assignments.size() == 1);
+  CHECK(week.days[6].assignments.size() == 1);
+  CHECK(week.next_monday == "2026-10-05");
+
+  std::filesystem::current_path(previous);
+  std::filesystem::remove_all(temp_dir);
+}

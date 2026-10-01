@@ -34,6 +34,21 @@ std::string ResolveDate(const std::string& date) {
   return date;
 }
 
+std::chrono::year_month_day ParseDate(const std::string& input) {
+  const std::string date = ResolveDate(input);
+  if (date.size() != 10 || date[4] != '-' || date[7] != '-') {
+    throw std::invalid_argument("Expected date in YYYY-MM-DD format");
+  }
+  const std::chrono::year_month_day parsed{
+      std::chrono::year{std::stoi(date.substr(0, 4))},
+      std::chrono::month{static_cast<unsigned>(std::stoi(date.substr(5, 2)))},
+      std::chrono::day{static_cast<unsigned>(std::stoi(date.substr(8, 2)))} };
+  if (!parsed.ok()) {
+    throw std::invalid_argument("Invalid calendar date");
+  }
+  return parsed;
+}
+
 }  // namespace
 
 Manager::Manager()
@@ -209,6 +224,43 @@ std::vector<Assignment> Manager::FilterAssignmentsForCourse(
     if (assignment.GetCourseId() == course_id) filtered.push_back(assignment);
   }
   return filtered;
+}
+
+CalendarWeek Manager::GetCalendarWeek(
+    const std::vector<Assignment>& source, const std::string& date) const {
+  const auto selected_day = std::chrono::sys_days{ParseDate(date)};
+  const auto weekday = std::chrono::weekday{selected_day};
+  const auto monday = selected_day -
+              std::chrono::days{
+                static_cast<int>(weekday.iso_encoding()) - 1};
+  const auto sunday = monday + std::chrono::days{6};
+
+  CalendarWeek week;
+  week.monday = FormatDate(std::chrono::year_month_day{monday});
+  week.sunday = FormatDate(std::chrono::year_month_day{sunday});
+  week.previous_monday =
+      FormatDate(std::chrono::year_month_day{monday - std::chrono::days{7}});
+  week.next_monday =
+      FormatDate(std::chrono::year_month_day{monday + std::chrono::days{7}});
+
+  for (std::size_t day = 0; day < week.days.size(); ++day) {
+    const auto date_point =
+        monday + std::chrono::days{static_cast<int>(day)};
+    week.days[day].date =
+        FormatDate(std::chrono::year_month_day{date_point});
+  }
+
+  for (const Assignment& assignment : source) {
+    try {
+      const auto due = std::chrono::sys_days{assignment.GetDateKey()};
+      if (due < monday || due > sunday) continue;
+      const auto day_index = static_cast<std::size_t>((due - monday).count());
+      week.days[day_index].assignments.push_back(assignment);
+    } catch (const std::exception&) {
+      // Ignore malformed stored dates rather than failing the entire week view.
+    }
+  }
+  return week;
 }
 
 Assignment* Manager::GetAssignmentById(const int id) {
